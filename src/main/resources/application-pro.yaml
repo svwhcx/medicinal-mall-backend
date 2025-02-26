@@ -1,0 +1,81 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: lost-found-test
+  # mysql 配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://172.17.0.1:3306/lost_and_found?useUnicode=true&characterEncoding=utf8&useSSL=true&serverTimezone=Asia/Shanghai
+    username: svwh
+    password: svwh2002219
+    type: com.alibaba.druid.pool.DruidDataSource
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  # redis 配置
+  redis:
+    host: 101.34.215.131
+    port: 6379
+    database: 10
+    password: svwh2002219
+    connect-timeout: 5000
+    timeout: 3000
+    # jedis 连接池配置
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1
+
+mybatis:
+  mapper-locations: classpath:com/experiment/lostandfoundsystem/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+# 开启mybatis查询日志
+logging:
+  config:
+    classpath:logback-logstash.xml
+
+# netty 配置
+
+websocket:
+  netty:
+    port: 58080
+    path: /webSocket
+
+# minio 分布式文件系统配置
+minio:
+  host-url: http://101.34.215.131:9000
+  access: lost_found
+  secret: lost_found
+
+# 配置邮件发送账号
+mail-service:
+  mail-infos:
+    - host-name: smtp.qq.com
+      username: cmanager@qq.com
+      password: ccfsywtccmjxeahj
+      from-sender: cmanager@qq.com
+      sender-rank: 3
+    - host-name: smtp.qq.com
+      username: 480252715@qq.com
+      password: amuixyxrpdbmbhjb
+      from-sender: 480252715@qq.com
+      sender-rank: 4
+    - host-name: smtp.163.com
+      username: cxkchenxin@163.com
+      password: WYHFMEUWWRSBEXNQ
+      from-sender: cxkchenxin@163.com
+      sender-rank: 8
+
+application:
+  log_dir: /home/app
+
+# logstash 配置
+logstash:
+  host: 101.34.215.131
+  port: 5044

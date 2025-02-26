@@ -1,0 +1,60 @@
+server:
+  port: 8083
+spring:
+  application:
+    name: medicine-mall
+  # mysql 配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql:///medicine-mall?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    type: com.alibaba.druid.pool.DruidDataSource
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+#  # redis 配置
+#  redis:
+#    host: 101.34.215.131
+#    port: 6379
+#    database: 10
+#    password: svwh2002219
+#    connect-timeout: 5000
+#    timeout: 3000
+#    # jedis 连接池配置
+#    jedis:
+#      pool:
+#        max-active: 8
+#        max-idle: 8
+#        min-idle: 0
+#        max-wait: -1
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**.xml
+  configuration:
+    # MyBatis 配置
+    map-underscore-to-camel-case: true
+  global-config:
+    # 全局配置
+    db-config:
+      # 数据库配置
+      id-type: auto
+
+## 开启mybatis查询日志
+#logging:
+#  config:
+#    classpath:logback-logstash.xml
+#  level:
+#    com:
+#      experiment:
+#        management:
+#          lostandfoundsystem:
+#            dao:
+#              debug
+
+
+application:
+  log_dir: /home/app
+
+
+

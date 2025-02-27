@@ -22,8 +22,8 @@ public enum ResponseDataEnum {
     RECRUIT_NOT_EXIST(1012,"招领不存在！"),
     TOKEN_VERIFY_FAIL(1013,"token校验失败!"),
     FILE_URL_IS_NULL(1014,"非法的文件操作！文件URL不能为空"),
-    ILLEGAL_OPERATION(1015,"禁止非法操作!")
-    ;
+    ILLEGAL_OPERATION(1015,"禁止非法操作!"),
+    INVALID_IMAGE_TYPE(1016, "非法的图片格式!" );
 
     private Integer code;
 

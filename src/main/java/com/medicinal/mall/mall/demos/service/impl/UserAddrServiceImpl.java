@@ -39,6 +39,7 @@ public class UserAddrServiceImpl implements UserAddrService {
     public void addUserAddr(UserAddr userAddr) {
         // 校验一下用户的收获地址
         // 比如手机号是否是符合规范的
+        // TODO 校验手机号是否符合规范
         userAddrDao.insert(userAddr);
     }
 

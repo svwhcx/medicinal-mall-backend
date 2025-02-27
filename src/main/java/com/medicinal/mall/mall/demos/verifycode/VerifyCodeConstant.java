@@ -1,4 +1,4 @@
-package com.medicinal.mall.mall.demos.constant;
+package com.medicinal.mall.mall.demos.verifycode;
 
 /**
  * @description

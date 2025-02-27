@@ -7,10 +7,7 @@ import com.medicinal.mall.mall.demos.service.UserAddrService;
 import com.medicinal.mall.mall.demos.vo.PageVo;
 import com.medicinal.mall.mall.demos.vo.UserAddrVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 用户地址的管理
@@ -48,10 +45,12 @@ public class UserAddrController extends BaseController {
     }
 
     /**
-     *
+     * 编辑修改某个地址的信息
+     * @param userAddr
      */
-    public void updateUserAddr(){
-
+    @PutMapping("/update")
+    public void updateUserAddr(@RequestBody UserAddr userAddr){
+        userAddrService.updateUserAddr(userAddr);
     }
 
 

@@ -2,6 +2,7 @@ package com.medicinal.mall.mall.demos.service;
 
 import com.medicinal.mall.mall.demos.command.FindPasswordCmd;
 import com.medicinal.mall.mall.demos.entity.User;
+import com.medicinal.mall.mall.demos.query.UserRegistryRequest;
 import com.medicinal.mall.mall.demos.vo.UserLoginVo;
 
 /**
@@ -22,7 +23,7 @@ public interface UserService {
      * 用户注册操作，账号和密码之类的。
      * @param user
      */
-    void register(User user);
+    void register(UserRegistryRequest userRegistryRequest);
 
     /**
      * 用户更新自己的个人信息

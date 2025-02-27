@@ -51,4 +51,7 @@ public class User {
 
     // 用户默认的收获地址的ID
     private Integer mainAddrId;
+
+    // 用户绑定的邮箱地址
+    private String email;
 }

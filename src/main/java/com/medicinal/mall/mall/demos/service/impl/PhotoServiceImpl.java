@@ -15,8 +15,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.medicinal.mall.mall.demos.constant.PhotoMsgConstant.IMAGE_SAVE_PATH;
 
@@ -40,7 +42,7 @@ public class PhotoServiceImpl implements PhotoService {
 
     @Override
     public Photo uploadPhoto(MultipartFile multipartFile) throws IOException {
-        File dir =new File(IMAGE_SAVE_PATH);
+        File dir = new File(IMAGE_SAVE_PATH);
         // 如果目录不存在则直接创建
         if (!dir.exists()) {
             dir.mkdirs();
@@ -55,7 +57,7 @@ public class PhotoServiceImpl implements PhotoService {
         // 将文件存储到磁盘中
         multipartFile.transferTo(Paths.get(file.getPath()));
         // 获取url
-        String photoAddr = URL_PREFIX+serverPort+"/"+fileName;
+        String photoAddr = URL_PREFIX + serverPort + "/" + fileName;
         Photo photo = new Photo();
         photo.setStartTime(LocalDateTime.now());
         photo.setAddr(photoAddr);
@@ -89,5 +91,14 @@ public class PhotoServiceImpl implements PhotoService {
     @Override
     public List<Photo> getPhotoList(List<Integer> ids) {
         return this.photoDao.selectByIds(ids);
+    }
+
+    @Override
+    public List<String> getPhotoUrlListByIds(List<Integer> ids) {
+        List<String> photoUrlList = new ArrayList<>();
+        for (Photo photo : this.photoDao.selectByIds(ids)) {
+            photoUrlList.add(photo.getAddr());
+        }
+        return this.photoDao.selectByIds(ids).stream().map(Photo::getAddr).collect(Collectors.toList());
     }
 }

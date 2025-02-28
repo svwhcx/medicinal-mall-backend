@@ -28,7 +28,7 @@ public class MedicinalMaterial {
     private Integer sellerId;
 
     // 当前商品的状态（主要有：0：上架；1：已发布；2：已下架）
-    private Integer status;
+    private Integer status = 0;
 
     // 当前药材商品的名称
     private String name;

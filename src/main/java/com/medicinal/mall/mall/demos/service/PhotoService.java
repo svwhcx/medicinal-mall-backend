@@ -39,4 +39,11 @@ public interface PhotoService {
      * @return 包含图片地址的Photo集合。
      */
     List<Photo> getPhotoList(List<Integer> ids);
+
+    /**
+     * 根据图片的id列表返回贴膜的访问地址信息。
+     * @param ids 图片的id列表
+     * @return
+     */
+    List<String> getPhotoUrlListByIds(List<Integer> ids);
 }

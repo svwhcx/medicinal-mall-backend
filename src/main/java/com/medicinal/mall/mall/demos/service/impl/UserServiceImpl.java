@@ -79,7 +79,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateById(User user) {
-
+        Integer userId = UserInfoThreadLocal.get().getUserId();
+        user.setId(userId);
+        this.userDao.updateById(user);
     }
 
     @Override

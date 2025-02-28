@@ -4,7 +4,9 @@ package com.medicinal.mall.mall.demos.common;
 public enum RoleEnum {
 
     user(0,"user"),
-    admin(1,"admin");
+    admin(1,"admin"),
+    seller(2, "seller"),
+    ;
 
     private Integer roleId;
     private String roleName;

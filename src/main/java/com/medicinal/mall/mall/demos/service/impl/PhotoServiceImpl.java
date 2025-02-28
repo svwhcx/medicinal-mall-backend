@@ -30,8 +30,14 @@ import static com.medicinal.mall.mall.demos.constant.PhotoMsgConstant.IMAGE_SAVE
 @Service
 public class PhotoServiceImpl implements PhotoService {
 
-    private static final String URL_PREFIX = "http://localhost:";
+    private static final String URL_PREFIX = "file://";
 
+    // 文件访问的前缀
+    @Value("application.urlPrefix")
+    private String urlPrefix;
+
+    @Value("application.filePath")
+    private String filePath;
 
     @Value("${server.port}")
     private int serverPort;
@@ -57,7 +63,7 @@ public class PhotoServiceImpl implements PhotoService {
         // 将文件存储到磁盘中
         multipartFile.transferTo(Paths.get(file.getPath()));
         // 获取url
-        String photoAddr = URL_PREFIX + serverPort + "/" + fileName;
+        String photoAddr = urlPrefix + serverPort + "/" + fileName;
         Photo photo = new Photo();
         photo.setStartTime(LocalDateTime.now());
         photo.setAddr(photoAddr);
@@ -71,11 +77,9 @@ public class PhotoServiceImpl implements PhotoService {
         List<Photo> photos = this.photoDao.selectByIds(ids);
         for (Photo photo : photos) {
             // 删除每个photo对应的图片
-            File file = new File(photo.getAddr());
-            if (file.exists()) {
-                file.delete();
-            }
-            // 假删除
+            FileUtil.deleteFile(filePath,photo.getAddr());
+            // 数据库执行假删除操作，硬删除操作在服务器资源充足的情况下再来进行。
+            // 例如使用一些shell脚本，或者在web服务中开启一个定时任务。
             LambdaUpdateWrapper<Photo> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(Photo::getId, photo.getId());
             updateWrapper.set(Photo::getIsDelete, true);

@@ -36,11 +36,19 @@ public class FileUtil {
         throw new BaseException(ResponseDataEnum.INVALID_IMAGE_TYPE);
     }
 
+    /**
+     * 根据URL快速删除文件
+     * @param url 图片的地址
+     */
     public static void deleteFile(String url){
+        deleteFile(PhotoMsgConstant.IMAGE_SAVE_PATH,url);
+    }
+
+    public static void deleteFile(String imageFilePath,String url){
         // 处理url
         int i = url.lastIndexOf("/");
         String substring = url.substring(i+1);
-        String fileUrl = PhotoMsgConstant.IMAGE_SAVE_PATH+ substring;
+        String fileUrl = imageFilePath+ substring;
         File file = new File(fileUrl);
         file.delete();
     }

@@ -54,7 +54,8 @@ mybatis-plus:
 
 
 application:
-  log_dir: /home/app
+  file_path: D:\GraduationDesign\images
+  url_prefix: http://images.svwh.top/
 
 
 

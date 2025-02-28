@@ -1,9 +1,14 @@
 package com.medicinal.mall.mall.demos.dao;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.medicinal.mall.mall.demos.entity.Seller;
+import org.apache.ibatis.annotations.Mapper;
+
 /**
  * @description
  * @Author cxk
  * @Date 2025/2/26 18:07
  */
-public interface SellerDao {
+@Mapper
+public interface SellerDao extends BaseMapper<Seller> {
 }

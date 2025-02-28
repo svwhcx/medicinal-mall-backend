@@ -1,12 +1,19 @@
 package com.medicinal.mall.mall.demos.verifycode;
 
 import com.medicinal.mall.mall.demos.query.VerifyCodeRequest;
+import com.svwh.mailservice.core.MailService;
+import com.svwh.mailservice.mail.HtmlMail;
+import com.svwh.mailservice.mail.Mail;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+
 
 /**
  * @description
@@ -15,6 +22,11 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 @Component
 public class EmailVerifyCode implements IVerifyCode{
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmailVerifyCode.class);
+
+    @Autowired
+    private MailService mailService;
 
     // 直接在这里进行模拟验证码池
     private final ConcurrentHashMap<String,Code> CODE_POOL = new ConcurrentHashMap<>();
@@ -27,6 +39,17 @@ public class EmailVerifyCode implements IVerifyCode{
         // 先进行随机生成,验证码一般30分钟内有效
         String verifyCode =String.valueOf(ThreadLocalRandom.current().nextInt(100000,999999));
         CODE_POOL.put(verifyCodeRequest.getAddr(),new Code(verifyCode,System.currentTimeMillis()+EXPIRE_TIME));
+        // 接下来就是调用邮件服务，发送一个验证码的邮箱
+        Mail mail = new HtmlMail();
+        List<String> mailList = new ArrayList<>();
+        mailList.add(verifyCodeRequest.getAddr());
+        mail.setToMail(mailList);
+        mail.setContent(verifyCodeRequest.getMsg() + ",您的验证码为:" + verifyCode);
+        mail.setSubject("全球药材在线商城");
+        mailService.send(mail);
+        mail.setToMail(mailList);
+        LOGGER.info("邮件验证码为  》》》 目的邮箱：{} ，验证码：{}  有效时间 30 分钟",
+                verifyCodeRequest.getAddr(), verifyCode);
     }
 
     @Override

@@ -7,6 +7,9 @@ import com.medicinal.mall.mall.demos.entity.User;
 import com.medicinal.mall.mall.demos.query.UserRegistryRequest;
 import com.medicinal.mall.mall.demos.service.UserService;
 import com.medicinal.mall.mall.demos.vo.UserLoginVo;
+import com.svwh.parametercheck.annotation.MustEmail;
+import com.svwh.parametercheck.annotation.NotNull;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +49,8 @@ public class UserController extends BaseController {
      * @return
      */
     @PostMapping("/register")
+    @MustEmail(key = "#userRegistryRequest.email")
+    @NotNull(keys = {"#userRegistryRequest.username","#userRegistryRequest.password","#userRegistryRequest.verifyCode"})
     public ResultVO<Void> register(@RequestBody UserRegistryRequest userRegistryRequest){
         userService.register(userRegistryRequest);
         return success();

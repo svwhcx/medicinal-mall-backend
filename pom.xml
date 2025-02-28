@@ -26,6 +26,22 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+
+        <!--        邮件发送服务-->
+        <dependency>
+            <groupId>com.github.cx2002</groupId>
+            <artifactId>mail-service-spring-boot-starter</artifactId>
+            <version>v1.0.0</version>
+        </dependency>
+
+<!--        注解方式的参数校验-->
+        <dependency>
+            <groupId>com.github.svwhcx</groupId>
+            <artifactId>svwh-annotation-parameter</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+
+
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
@@ -129,6 +145,15 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://www.jitpack.io</url>
+        </repository>
+    </repositories>
+
 
     <build>
         <plugins>

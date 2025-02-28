@@ -25,4 +25,7 @@ public class VerifyCodeRequest {
     // 验证码类型（1：邮箱验证码，2：手机验证码）
     private Integer type;
 
+    // 提示是在找回密码还是说是注册操作
+    private String msg;
+
 }

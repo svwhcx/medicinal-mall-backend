@@ -1,7 +1,11 @@
 package com.medicinal.mall.mall.demos.vo;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import javax.print.DocFlavor;
 
 /**
  * @description
@@ -13,7 +17,7 @@ import lombok.Setter;
 public class UserLoginVo {
 
     // 用户名称
-    private String username;
+    private UserInfoVo userInfo;
 
     // 用户登录成功后的token信息
     private String token;
@@ -21,3 +25,5 @@ public class UserLoginVo {
     // 用户的id（可以不需要了）
 //    private Integer userId;
 }
+
+

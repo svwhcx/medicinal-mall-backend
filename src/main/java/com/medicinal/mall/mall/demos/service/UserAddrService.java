@@ -42,4 +42,10 @@ public interface UserAddrService {
      * @return
      */
     UserAddr getAddrInfoById(Integer userAddrId);
+
+    /**
+     * 根据地址ID来删除一个地址。
+     * @param userAddrId 地址id
+     */
+    void deleteUserAddr(Integer userAddrId);
 }

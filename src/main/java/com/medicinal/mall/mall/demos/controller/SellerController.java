@@ -6,9 +6,10 @@ import com.medicinal.mall.mall.demos.common.ResultVO;
 import com.medicinal.mall.mall.demos.common.RoleEnum;
 import com.medicinal.mall.mall.demos.entity.Seller;
 import com.medicinal.mall.mall.demos.entity.User;
-import com.medicinal.mall.mall.demos.query.UserRegistryRequest;
+import com.medicinal.mall.mall.demos.query.UserRequest;
 import com.medicinal.mall.mall.demos.service.SellerService;
 import com.medicinal.mall.mall.demos.vo.UserLoginVo;
+import com.svwh.parametercheck.annotation.MustEmail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,8 +33,8 @@ public class SellerController extends BaseController {
      * @return
      */
     @PostMapping("/login")
-    public ResultVO<UserLoginVo> login(@RequestBody User user) {
-        return success(sellerService.userLogin(user));
+    public ResultVO<UserLoginVo> login(@RequestBody UserRequest userRequest) {
+        return success(sellerService.userLogin(userRequest));
     }
 
 
@@ -42,12 +43,13 @@ public class SellerController extends BaseController {
      * 后续的找回密码需要
      * 用户注册新用户的操作
      *
-     * @param userRegistryRequest 用户注册的一些基本信息，包括用户名和密码之类的。
+     * @param userRequest 用户注册的一些基本信息，包括用户名和密码之类的。
      * @return
      */
     @PostMapping("/register")
-    public ResultVO<Void> register(@RequestBody UserRegistryRequest userRegistryRequest) {
-        sellerService.register(userRegistryRequest);
+    @MustEmail(key = "#userRegistryRequest.email")
+    public ResultVO<Void> register(@RequestBody UserRequest userRequest) {
+        sellerService.register(userRequest);
         return success();
     }
 
@@ -58,7 +60,7 @@ public class SellerController extends BaseController {
      * @param seller 商家的个人信息
      * @return
      */
-    @TokenVerify(isNeedInfo = true)
+    @TokenVerify(value = RoleEnum.seller,isNeedInfo = true)
     @PutMapping("/update")
     public ResultVO<Void> update(@RequestBody Seller seller) {
         sellerService.updateById(seller);
@@ -84,6 +86,7 @@ public class SellerController extends BaseController {
      * @return
      */
     @PostMapping("/logout")
+    @TokenVerify(value = RoleEnum.seller)
     public ResultVO<Void> logout(@RequestBody UserLoginVo userLoginVo) {
         sellerService.logout(userLoginVo);
         return success();
@@ -94,7 +97,7 @@ public class SellerController extends BaseController {
      * @return
      */
     @GetMapping("/info")
-    @TokenVerify(RoleEnum.seller)
+    @TokenVerify(value = RoleEnum.seller,isNeedInfo = true)
     public ResultVO<Seller> getSellerInfo(){
         return success(this.sellerService.getInfo());
     }

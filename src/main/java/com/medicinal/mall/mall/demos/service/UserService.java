@@ -1,8 +1,9 @@
 package com.medicinal.mall.mall.demos.service;
 
+import com.medicinal.mall.mall.demos.command.ChangePasswordCmd;
 import com.medicinal.mall.mall.demos.command.FindPasswordCmd;
 import com.medicinal.mall.mall.demos.entity.User;
-import com.medicinal.mall.mall.demos.query.UserRegistryRequest;
+import com.medicinal.mall.mall.demos.query.UserRequest;
 import com.medicinal.mall.mall.demos.vo.UserLoginVo;
 
 /**
@@ -17,13 +18,13 @@ public interface UserService {
      * @param user 用户登录的信息
      * @return
      */
-    UserLoginVo userLogin(User user);
+    UserLoginVo userLogin(UserRequest userRequest);
 
     /**
      * 用户注册操作，账号和密码之类的。
      * @param user
      */
-    void register(UserRegistryRequest userRegistryRequest);
+    void register(UserRequest userRequest);
 
     /**
      * 用户更新自己的个人信息
@@ -55,4 +56,20 @@ public interface UserService {
      * @return 用户的基本信息
      */
     User getById(Integer userId);
+
+    void changePassword(ChangePasswordCmd changePasswordCmd);
+
+    /**
+     * 根据用户的id查询用户名称
+     * @param userId 用户的id
+     * @return 用户的名称
+     */
+    String queryUserNameById(Integer userId);
+
+    /**
+     * 根据用户的id获取用户的默认收获地址
+     * @param userID 用户的id
+     * @return
+     */
+    Integer queryAddrByUserId(Integer userID);
 }

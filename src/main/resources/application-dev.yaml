@@ -41,21 +41,22 @@ mybatis-plus:
       id-type: auto
 
 ## 开启mybatis查询日志
-#logging:
-#  config:
-#    classpath:logback-logstash.xml
-#  level:
-#    com:
-#      experiment:
-#        management:
-#          lostandfoundsystem:
-#            dao:
-#              debug
+logging:
+  level:
+    com:
+      medicinal:
+        mall:
+          mall:
+            demos:
+              dao:
+                debug
 
 
 application:
-  file_path: D:/GraduationDesign/images/
-  url_prefix: http://images.svwh.top/
+  file:
+    path: D:/GraduationDesign/images/
+  url:
+    prefix: http://localhost:8083/images/
 
 # 配置邮件发送账号
 mail-service:

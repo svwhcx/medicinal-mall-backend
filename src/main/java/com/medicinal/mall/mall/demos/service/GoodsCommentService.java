@@ -3,6 +3,7 @@ package com.medicinal.mall.mall.demos.service;
 import com.medicinal.mall.mall.demos.query.CommentPageRequest;
 import com.medicinal.mall.mall.demos.vo.CommentVo;
 import com.medicinal.mall.mall.demos.vo.PageVo;
+import com.medicinal.mall.mall.demos.vo.ProductCommentVo;
 
 /**
  * @description
@@ -16,6 +17,14 @@ public interface GoodsCommentService {
      * @param commentPageRequest 商品的评论
      */
     PageVo<CommentVo> queryByPage(CommentPageRequest commentPageRequest);
+
+
+    /**
+     * 商家获取当前自己的全部商品的评价列表
+     * @param commentPageRequest 分页评价请求
+     * @return
+     */
+    PageVo<ProductCommentVo> sellerQueryByPage(CommentPageRequest commentPageRequest);
 
     /**
      * 用户在购买后，对商品进行评价

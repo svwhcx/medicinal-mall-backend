@@ -1,11 +1,15 @@
 package com.medicinal.mall.mall.demos.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 /**
  * @description
@@ -27,6 +31,11 @@ public class Seller {
     // 商家的地址
     private String addr;
 
+    /**
+     * 用户的头像（这里是商家）
+     */
+    private String avatar;
+
     // 手机号
     private String phoneNumber;
 
@@ -34,9 +43,12 @@ public class Seller {
     private String username;
 
     // 密码
+    @TableField("`password`")
     private String password;
 
+
     // 商家的店铺介绍，简介等等
+    @TableField("`desc`")
     private String desc;
 
     // 商家对应的店铺的封面图片
@@ -44,4 +56,8 @@ public class Seller {
 
     // 商家的邮箱
     private String email;
+
+    // 用户的注册/创建时间
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createTime;
 }

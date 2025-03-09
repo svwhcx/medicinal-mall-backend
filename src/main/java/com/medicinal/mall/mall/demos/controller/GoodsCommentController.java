@@ -1,16 +1,16 @@
 package com.medicinal.mall.mall.demos.controller;
 
+import com.medicinal.mall.mall.demos.aop.annotation.TokenVerify;
 import com.medicinal.mall.mall.demos.common.ResultVO;
+import com.medicinal.mall.mall.demos.common.RoleEnum;
 import com.medicinal.mall.mall.demos.query.CommentPageRequest;
 import com.medicinal.mall.mall.demos.service.GoodsCommentService;
 import com.medicinal.mall.mall.demos.vo.CommentVo;
 import com.medicinal.mall.mall.demos.vo.PageVo;
 
+import com.medicinal.mall.mall.demos.vo.ProductCommentVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @description 用户可以在付款后，对商品进行评价（可以附带一些图片），
@@ -41,7 +41,8 @@ public class GoodsCommentController extends BaseController{
      * @return
      */
     @PostMapping("/add")
-    public ResultVO<Void> addComment(CommentVo commentVo){
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
+    public ResultVO<Void> addComment(@RequestBody CommentVo commentVo){
         this.goodsCommentService.add(commentVo);
         return success();
     }
@@ -52,8 +53,16 @@ public class GoodsCommentController extends BaseController{
      * @return
      */
     @PostMapping("/reply")
-    public ResultVO<Void> replyComment(CommentVo commentVo){
+    @TokenVerify(value = RoleEnum.seller,isNeedInfo = true)
+    public ResultVO<Void> replyComment(@RequestBody CommentVo commentVo){
         this.goodsCommentService.reply(commentVo);
         return success();
+    }
+
+
+    @GetMapping("/seller")
+    @TokenVerify(value = RoleEnum.seller,isNeedInfo = true)
+    public ResultVO<PageVo<ProductCommentVo>> sellerGetCommentList(CommentPageRequest commentPageRequest){
+        return success(goodsCommentService.sellerQueryByPage(commentPageRequest));
     }
 }

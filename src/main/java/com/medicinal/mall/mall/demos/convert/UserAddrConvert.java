@@ -19,13 +19,13 @@ public class UserAddrConvert {
      * @param userAddr 地址信息
      * @return
      */
-    public static UserAddrVo convert2Vo(UserAddr userAddr,Integer userId) {
+    public static UserAddrVo convert2Vo(UserAddr userAddr,Integer addrID) {
         UserAddrVo userAddrVo = new UserAddrVo();
         userAddrVo.setAddr(userAddr.getAddr());
         userAddrVo.setId(userAddr.getId());
         userAddrVo.setRecipient(userAddr.getRecipient());
         userAddrVo.setContactDetail(userAddr.getContactDetail());
-        if (ObjectUtil.equal(userId, userAddr.getUserId())){
+        if (ObjectUtil.equal(addrID, userAddr.getId())){
             userAddrVo.setIsMainAddr(true);
         }
         return userAddrVo;
@@ -36,10 +36,10 @@ public class UserAddrConvert {
      * @param userAddrList entity列表
      * @return
      */
-    public static List<UserAddrVo> convert2VoList(List<UserAddr> userAddrList,Integer userId){
+    public static List<UserAddrVo> convert2VoList(List<UserAddr> userAddrList,Integer addrId){
         List<UserAddrVo> userAddrVoList = new ArrayList<>();
         for (UserAddr userAddr : userAddrList) {
-            userAddrVoList.add(convert2Vo(userAddr,userId));
+            userAddrVoList.add(convert2Vo(userAddr,addrId));
         }
         return userAddrVoList;
     }

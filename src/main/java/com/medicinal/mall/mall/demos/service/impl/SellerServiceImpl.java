@@ -4,18 +4,23 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.medicinal.mall.mall.demos.command.FindPasswordCmd;
 import com.medicinal.mall.mall.demos.common.ResponseDataEnum;
+import com.medicinal.mall.mall.demos.common.RoleEnum;
 import com.medicinal.mall.mall.demos.common.UserInfoThreadLocal;
 import com.medicinal.mall.mall.demos.dao.SellerDao;
 import com.medicinal.mall.mall.demos.entity.Seller;
 import com.medicinal.mall.mall.demos.entity.User;
 import com.medicinal.mall.mall.demos.exception.ParamException;
 import com.medicinal.mall.mall.demos.exception.UserLogFail;
-import com.medicinal.mall.mall.demos.query.UserRegistryRequest;
+import com.medicinal.mall.mall.demos.query.UserRequest;
 import com.medicinal.mall.mall.demos.query.VerifyCodeRequest;
 import com.medicinal.mall.mall.demos.service.SellerService;
+import com.medicinal.mall.mall.demos.token.TokenBuilder;
+import com.medicinal.mall.mall.demos.token.TokenInfo;
 import com.medicinal.mall.mall.demos.util.PasswordUtils;
 import com.medicinal.mall.mall.demos.verifycode.IVerifyCode;
 import com.medicinal.mall.mall.demos.verifycode.VerifyCodeConstant;
+import com.medicinal.mall.mall.demos.verifycode.context.VerifyCodeContext;
+import com.medicinal.mall.mall.demos.vo.UserInfoVo;
 import com.medicinal.mall.mall.demos.vo.UserLoginVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,47 +37,64 @@ public class SellerServiceImpl implements SellerService {
     private SellerDao sellerDao;
 
     @Autowired
-    private IVerifyCode iVerifyCode;
+    private VerifyCodeContext verifyCodeContext;
 
     @Override
-    public UserLoginVo userLogin(User user) {
+    public UserLoginVo userLogin(UserRequest userRequest) {
+
+        // 先验证图片验证码是否正确
+        IVerifyCode iVerifyCode = verifyCodeContext.getIVerifyCode(userRequest.getVerifyType());
+        if (!iVerifyCode.checkVerifyCode(new VerifyCodeRequest(userRequest.getPictureUUID(), userRequest.getVerifyCode(), userRequest.getVerifyType(), null))){
+            throw new ParamException(ResponseDataEnum.VERIFICATION_ERROR);
+        }
         // 先对密码进行加密验证
-        user.setPassword(PasswordUtils.encryption(user.getPassword()));
+        userRequest.setPassword(PasswordUtils.encryption(userRequest.getPassword()));
         // 使用LambdaQueryWrapper来进行User实体类的账号和密码查询
         // 获取数据库中的用户信息
-        Seller sellerInfo = sellerDao.selectOne(new LambdaQueryWrapper<Seller>().select(Seller::getUsername,Seller::getPassword));
+        LambdaQueryWrapper<Seller> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Seller::getUsername,userRequest.getAccount());
+        queryWrapper.eq(Seller::getPassword, userRequest.getPassword());
+        Seller sellerInfo = sellerDao.selectOne(queryWrapper);
         if (sellerInfo == null){
             throw new UserLogFail(ResponseDataEnum.LOGIN_FAIL);
         }
         // 如果用户登录成功则进行token的构建。
-        return new UserLoginVo();
+        UserLoginVo userLoginVo = new UserLoginVo();
+        TokenInfo tokenInfo = new TokenInfo();
+        tokenInfo.setUserId(sellerInfo.getId());
+        tokenInfo.setRoleId(RoleEnum.seller.getRoleId());
+        tokenInfo.setUsername(sellerInfo.getUsername());
+        userLoginVo.setToken(TokenBuilder.buildToken(tokenInfo));
+        userLoginVo.setUserInfo(new UserInfoVo(sellerInfo.getUsername(), sellerInfo.getAvatar()));
+        return userLoginVo;
     }
 
     @Override
-    public void register(UserRegistryRequest userRegistryRequest) {
+    public void register(UserRequest userRequest) {
         // 然后验证邮箱是否已经被占用了
-        if (sellerDao.selectOne(new LambdaQueryWrapper<Seller>().eq(Seller::getEmail,userRegistryRequest.getEmail())) != null){
+        if (sellerDao.selectOne(new LambdaQueryWrapper<Seller>().eq(Seller::getEmail, userRequest.getEmail())) != null){
             throw new ParamException(ResponseDataEnum.EMAIL_EXITS);
         }
         // 如果没有注册则验证验证码是否正确
-        Boolean verifyRes = iVerifyCode.checkVerifyCode(new VerifyCodeRequest(userRegistryRequest.getEmail(),userRegistryRequest.getVerifyCode(), VerifyCodeConstant.EMAIL_VERIFY));
+        Boolean verifyRes = verifyCodeContext.getIVerifyCode(VerifyCodeConstant.EMAIL_VERIFY)
+                .checkVerifyCode(new VerifyCodeRequest(userRequest.getEmail(), userRequest.getVerifyCode(), VerifyCodeConstant.EMAIL_VERIFY,null));
         if (!verifyRes){
             throw new ParamException(ResponseDataEnum.VERIFICATION_ERROR);
         }
         // 用户的注册操作，先验证是否已经有用户注册该账号了
-        if (sellerDao.selectOne(new LambdaQueryWrapper<Seller>().eq(Seller::getUsername,userRegistryRequest.getUsername())) != null){
+        if (sellerDao.selectOne(new LambdaQueryWrapper<Seller>().eq(Seller::getUsername, userRequest.getAccount())) != null){
             throw new UserLogFail(ResponseDataEnum.USERNAME_EXIST);
         }
 
         // 然后用户注册时的密码强度的一个校验部分
-        if (!PasswordUtils.isStrong(userRegistryRequest.getPassword())){
+        if (!PasswordUtils.isStrong(userRequest.getPassword())){
             throw new UserLogFail(ResponseDataEnum.PASSWORD_NOT_STRONG);
         }
         // 都通过了，使用加密手段对用户的密码进行加密存储.
         Seller seller = new Seller();
-        seller.setUsername(userRegistryRequest.getUsername());
-        seller.setPassword(PasswordUtils.encryption(userRegistryRequest.getPassword()));
-        seller.setEmail(userRegistryRequest.getEmail());
+        seller.setUsername(userRequest.getAccount());
+        seller.setPassword(PasswordUtils.encryption(userRequest.getPassword()));
+        seller.setEmail(userRequest.getEmail());
         sellerDao.insert(seller);
     }
 
@@ -88,8 +110,8 @@ public class SellerServiceImpl implements SellerService {
     public void findPassword(FindPasswordCmd findPasswordCmd) {
         // TODO
         // 1. 先从Redis中查找对应的邮箱的验证码
-        VerifyCodeRequest verifyCodeRequest = new VerifyCodeRequest(findPasswordCmd.getEmail(),findPasswordCmd.getCode(), VerifyCodeConstant.EMAIL_VERIFY);
-        if (!iVerifyCode.checkVerifyCode(verifyCodeRequest)){
+        VerifyCodeRequest verifyCodeRequest = new VerifyCodeRequest(findPasswordCmd.getEmail(),findPasswordCmd.getCode(), VerifyCodeConstant.EMAIL_VERIFY,null);
+        if (!verifyCodeContext.getIVerifyCode(verifyCodeRequest).checkVerifyCode(verifyCodeRequest)){
             throw new ParamException(ResponseDataEnum.VERIFICATION_ERROR);
         }
         // 校验一下用户设置的新密码的强度
@@ -105,7 +127,7 @@ public class SellerServiceImpl implements SellerService {
 
     @Override
     public void logout(UserLoginVo userLoginVo) {
-        // TODO 商家和用户的登录操作都还没有实现
+        // TODO 商家和用户的登出操作都还没有实现
     }
 
     @Override

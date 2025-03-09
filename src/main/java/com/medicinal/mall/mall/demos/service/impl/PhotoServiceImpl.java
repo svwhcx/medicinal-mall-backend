@@ -2,6 +2,8 @@ package com.medicinal.mall.mall.demos.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.medicinal.mall.mall.demos.common.UserInfoThreadLocal;
 import com.medicinal.mall.mall.demos.dao.PhotoDao;
 import com.medicinal.mall.mall.demos.entity.Photo;
 import com.medicinal.mall.mall.demos.service.PhotoService;
@@ -15,9 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.medicinal.mall.mall.demos.constant.PhotoMsgConstant.IMAGE_SAVE_PATH;
@@ -28,15 +28,16 @@ import static com.medicinal.mall.mall.demos.constant.PhotoMsgConstant.IMAGE_SAVE
  * @Date 2025/2/26 18:22
  */
 @Service
+
 public class PhotoServiceImpl implements PhotoService {
 
     private static final String URL_PREFIX = "file://";
 
     // 文件访问的前缀
-    @Value("application.urlPrefix")
+    @Value("${application.url.prefix}")
     private String urlPrefix;
 
-    @Value("application.filePath")
+    @Value("${application.file.path}")
     private String filePath;
 
     @Value("${server.port}")
@@ -48,7 +49,7 @@ public class PhotoServiceImpl implements PhotoService {
 
     @Override
     public Photo uploadPhoto(MultipartFile multipartFile) throws IOException {
-        File dir = new File(IMAGE_SAVE_PATH);
+        File dir = new File(filePath);
         // 如果目录不存在则直接创建
         if (!dir.exists()) {
             dir.mkdirs();
@@ -59,14 +60,15 @@ public class PhotoServiceImpl implements PhotoService {
         FileUtil.validImageType(suffix);
         String uid = UUID.randomUUID().toString();
         String fileName = uid + suffix;
-        File file = new File(IMAGE_SAVE_PATH, fileName);
+        File file = new File(filePath, fileName);
         // 将文件存储到磁盘中
         multipartFile.transferTo(Paths.get(file.getPath()));
         // 获取url
-        String photoAddr = urlPrefix + serverPort + "/" + fileName;
+        String photoAddr = urlPrefix + fileName;
         Photo photo = new Photo();
         photo.setStartTime(LocalDateTime.now());
         photo.setAddr(photoAddr);
+        photo.setUserId(UserInfoThreadLocal.get().getUserId());
         this.photoDao.insert(photo);
         return photo;
     }
@@ -104,5 +106,22 @@ public class PhotoServiceImpl implements PhotoService {
             photoUrlList.add(photo.getAddr());
         }
         return this.photoDao.selectByIds(ids).stream().map(Photo::getAddr).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getPhotoUrlListByCombineIds(String ids) {
+        if (ids == null) return Collections.emptyList();
+        // 处理ids的分割
+        String[] split = ids.split(",");
+        List<Integer> photoIds = new ArrayList<>();
+        for (String s : split) {
+            if (s.isEmpty()) continue;
+            Integer id = Integer.parseInt(s);
+            photoIds.add(id);
+        }
+        LambdaQueryWrapper<Photo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Photo::getId, photoIds).select(Photo::getAddr);
+        List<Photo> photos = this.photoDao.selectList(queryWrapper);
+        return photos.stream().map(Photo::getAddr).collect(Collectors.toList());
     }
 }

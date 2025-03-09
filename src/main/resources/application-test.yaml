@@ -41,19 +41,38 @@ mybatis-plus:
       id-type: auto
 
 ## 开启mybatis查询日志
-#logging:
-#  config:
-#    classpath:logback-logstash.xml
-#  level:
-#    com:
-#      experiment:
-#        management:
-#          lostandfoundsystem:
-#            dao:
-#              debug
+logging:
+  level:
+    com:
+      medicinal:
+        mall:
+          mall:
+            demos:
+              dao:
+                debug
 
-# 图片文件保存的位置.
+
 application:
-  file_path: /root/webs/mall/images
-  url_prefix: http://images.svwh.top/
+  file:
+    path: D:/GraduationDesign/images/
+  url:
+    prefix: http://images.svwh.top/
 
+# 配置邮件发送账号
+mail-service:
+  mail-infos:
+    - host-name: smtp.qq.com
+      username: cmanager@qq.com
+      password: ccfsywtccmjxeahj
+      from-sender: cmanager@qq.com
+      sender-rank: 3
+    - host-name: smtp.qq.com
+      username: 480252715@qq.com
+      password: amuixyxrpdbmbhjb
+      from-sender: 480252715@qq.com
+      sender-rank: 4
+    - host-name: smtp.163.com
+      username: cxkchenxin@163.com
+      password: WYHFMEUWWRSBEXNQ
+      from-sender: cxkchenxin@163.com
+      sender-rank: 8

@@ -1,15 +1,17 @@
 package com.medicinal.mall.mall.demos.controller;
 
 import com.medicinal.mall.mall.demos.aop.annotation.TokenVerify;
+import com.medicinal.mall.mall.demos.command.ChangePasswordCmd;
 import com.medicinal.mall.mall.demos.command.FindPasswordCmd;
 import com.medicinal.mall.mall.demos.common.ResultVO;
+import com.medicinal.mall.mall.demos.common.RoleEnum;
+import com.medicinal.mall.mall.demos.common.UserInfoThreadLocal;
 import com.medicinal.mall.mall.demos.entity.User;
-import com.medicinal.mall.mall.demos.query.UserRegistryRequest;
+import com.medicinal.mall.mall.demos.query.UserRequest;
 import com.medicinal.mall.mall.demos.service.UserService;
 import com.medicinal.mall.mall.demos.vo.UserLoginVo;
 import com.svwh.parametercheck.annotation.MustEmail;
 import com.svwh.parametercheck.annotation.NotNull;
-import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,8 +36,8 @@ public class UserController extends BaseController {
      * @return
      */
     @PostMapping("/login")
-    public ResultVO<UserLoginVo> login(@RequestBody User user){
-        return success(userService.userLogin(user));
+    public ResultVO<UserLoginVo> login(@RequestBody UserRequest userRequest){
+        return success(userService.userLogin(userRequest));
     }
 
 
@@ -45,14 +47,12 @@ public class UserController extends BaseController {
      * TODO 用户注册的时候的邮箱验证码操作
      * 后续的找回密码需要
      * 用户注册新用户的操作
-     * @param userRegistryRequest 用户注册的一些基本信息，包括用户名和密码之类的。
+     * @param userRequest 用户注册的一些基本信息，包括用户名和密码之类的。
      * @return
      */
     @PostMapping("/register")
-    @MustEmail(key = "#userRegistryRequest.email")
-    @NotNull(keys = {"#userRegistryRequest.username","#userRegistryRequest.password","#userRegistryRequest.verifyCode"})
-    public ResultVO<Void> register(@RequestBody UserRegistryRequest userRegistryRequest){
-        userService.register(userRegistryRequest);
+   public ResultVO<Void> register(@RequestBody UserRequest userRequest){
+        userService.register(userRequest);
         return success();
     }
 
@@ -62,17 +62,28 @@ public class UserController extends BaseController {
      * @param user
      * @return
      */
-    @TokenVerify(isNeedInfo = true)
-    @PutMapping("/update")
+    @PutMapping("/info")
+    @TokenVerify(value = {RoleEnum.user},isNeedInfo = true)
     public ResultVO<Void> update(@RequestBody User user){
         userService.updateById(user);
         return success();
     }
 
     /**
+     * 用户获取自己的个人信息
+     * @return
+     */
+    @GetMapping("/info")
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
+    public ResultVO<User> getUserInfo(){
+        Integer userId = UserInfoThreadLocal.get().getUserId();
+        return success(userService.getById(userId));
+    }
+
+    /**
      * TODO
      * 用户找回密码
-     * @param userLoginVo
+     * @param findPasswordCmd 找回密码的详细情况
      * @return
      */
     @PostMapping("/findPassword")
@@ -86,8 +97,22 @@ public class UserController extends BaseController {
      * @return
      */
     @PostMapping("/logout")
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
     public ResultVO<Void> logout(@RequestBody UserLoginVo userLoginVo){
         userService.logout(userLoginVo);
+        return success();
+    }
+
+
+    /**
+     * 用户修改自己的密码
+     * @param changePasswordCmd
+     * @return
+     */
+    @PutMapping("/password")
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
+    public ResultVO<Void> changePassword(@RequestBody ChangePasswordCmd changePasswordCmd){
+        userService.changePassword(changePasswordCmd);
         return success();
     }
 }

@@ -1,6 +1,8 @@
 package com.medicinal.mall.mall.demos.controller;
 
+import com.medicinal.mall.mall.demos.aop.annotation.TokenVerify;
 import com.medicinal.mall.mall.demos.common.ResultVO;
+import com.medicinal.mall.mall.demos.common.RoleEnum;
 import com.medicinal.mall.mall.demos.entity.UserAddr;
 import com.medicinal.mall.mall.demos.query.PageQuery;
 import com.medicinal.mall.mall.demos.service.UserAddrService;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * @Date 2025/2/24 11:46
  */
 @RestController
-@RequestMapping("/userAddr")
+@RequestMapping("/address")
 public class UserAddrController extends BaseController {
 
 
@@ -28,8 +30,9 @@ public class UserAddrController extends BaseController {
      * @param userAddr 待添加的用户地址
      * @return void
      */
-    @PostMapping("/add")
-    public ResultVO<Void> addUserAddr(UserAddr userAddr){
+    @PostMapping
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
+    public ResultVO<Void> addUserAddr(@RequestBody UserAddr userAddr){
         userAddrService.addUserAddr(userAddr);
         return success();
     }
@@ -40,6 +43,7 @@ public class UserAddrController extends BaseController {
      * @return 对应的收获地址的详细信息
      */
     @GetMapping("/info")
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
     public ResultVO<UserAddr> getUserAddrInfo(Integer userAddrId){
         return success(userAddrService.getAddrInfoById(userAddrId));
     }
@@ -48,9 +52,12 @@ public class UserAddrController extends BaseController {
      * 编辑修改某个地址的信息
      * @param userAddr
      */
-    @PutMapping("/update")
-    public void updateUserAddr(@RequestBody UserAddr userAddr){
+    @PutMapping("/{id}")
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
+    public ResultVO<Void> updateUserAddr(@PathVariable("id") Integer id,@RequestBody UserAddr userAddr){
+        userAddr.setId(id);
         userAddrService.updateUserAddr(userAddr);
+        return success();
     }
 
 
@@ -59,13 +66,34 @@ public class UserAddrController extends BaseController {
      * @param pageQuery 分页参数
      * @return
      */
-    @GetMapping("/list")
+    @GetMapping("")
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
     public ResultVO<PageVo<UserAddrVo>> listUserAddr(PageQuery pageQuery){
         return success(userAddrService.listAllUserAddr(pageQuery));
     }
 
 
-    public void deleteUserAddr(){
+    /**
+     * 用户删除当前的自己的地址
+     * @param userAddrId 删除的目标地址的id
+     * @return
+     */
+    @DeleteMapping("")
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
+    public ResultVO<Void> deleteUserAddr(Integer userAddrId){
+        this.userAddrService.deleteUserAddr(userAddrId);
+        return success();
+    }
 
+    /**
+     * 用户设置一个地址为默认的收获地址
+     * @param addrID 收获地址对应的ID
+     * @return
+     */
+    @PutMapping("/{id}/default")
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
+    public ResultVO<Void> setAddrMain(@PathVariable("id") Integer addrID){
+        this.userAddrService.setAddrMain(addrID);
+        return success();
     }
 }

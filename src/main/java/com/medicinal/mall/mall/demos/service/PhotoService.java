@@ -46,4 +46,11 @@ public interface PhotoService {
      * @return
      */
     List<String> getPhotoUrlListByIds(List<Integer> ids);
+
+    /**
+     * 根据组合性的ids获取图片信息
+     * @param ids string类型的图片id列表例如：1,2,3,4,5
+     * @return
+     */
+    List<String> getPhotoUrlListByCombineIds(String ids);
 }

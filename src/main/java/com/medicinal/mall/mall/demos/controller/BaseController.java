@@ -1,6 +1,8 @@
 package com.medicinal.mall.mall.demos.controller;
 
 import com.medicinal.mall.mall.demos.common.ResultVO;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.xml.transform.Result;
 

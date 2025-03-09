@@ -24,4 +24,14 @@ public class CommentVo extends GoodsComment {
 
     // 提交评论时的图片id列表
     private List<Integer> photoIds;
+
+    /**
+     * 评论用户的用户名（暂时就使用这个名称）
+     */
+    private String username;
+
+    /**
+     * 评论用户的昵称
+     */
+    private String nickname;
 }

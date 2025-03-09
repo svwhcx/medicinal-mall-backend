@@ -3,7 +3,7 @@ package com.medicinal.mall.mall.demos.service;
 import com.medicinal.mall.mall.demos.command.FindPasswordCmd;
 import com.medicinal.mall.mall.demos.entity.Seller;
 import com.medicinal.mall.mall.demos.entity.User;
-import com.medicinal.mall.mall.demos.query.UserRegistryRequest;
+import com.medicinal.mall.mall.demos.query.UserRequest;
 import com.medicinal.mall.mall.demos.vo.UserLoginVo;
 
 /**
@@ -17,13 +17,13 @@ public interface SellerService {
      * @param user 商家的登录信息（这里直接和User进行共用了）
      * @return
      */
-    UserLoginVo userLogin(User user);
+    UserLoginVo userLogin(UserRequest user);
 
     /**
      * 商家进行一个注册操作
-     * @param userRegistryRequest 商家注册的信息
+     * @param userRequest 商家注册的信息
      */
-    void register(UserRegistryRequest userRegistryRequest);
+    void register(UserRequest userRequest);
 
     /**
      * 商家修改一些个人信息

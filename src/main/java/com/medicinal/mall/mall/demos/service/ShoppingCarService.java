@@ -2,6 +2,7 @@ package com.medicinal.mall.mall.demos.service;
 
 import com.medicinal.mall.mall.demos.entity.ShoppingCar;
 import com.medicinal.mall.mall.demos.query.PageQuery;
+import com.medicinal.mall.mall.demos.vo.CartInfoVo;
 import com.medicinal.mall.mall.demos.vo.PageVo;
 import com.medicinal.mall.mall.demos.vo.ShoppingCarInfoVo;
 
@@ -38,4 +39,11 @@ public interface ShoppingCarService {
      * @param shoppingCar 修改后的购物车的某个商品的数量。
      */
     void updateById(ShoppingCar shoppingCar);
+
+
+    /**
+     * 分页查询
+     * @return
+     */
+    PageVo<CartInfoVo> queryByPage(PageQuery pageQuery);
 }

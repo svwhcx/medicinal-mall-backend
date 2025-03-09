@@ -1,6 +1,8 @@
 package com.medicinal.mall.mall.demos.controller;
 
+import com.medicinal.mall.mall.demos.aop.annotation.TokenVerify;
 import com.medicinal.mall.mall.demos.common.ResultVO;
+import com.medicinal.mall.mall.demos.common.RoleEnum;
 import com.medicinal.mall.mall.demos.entity.Photo;
 import com.medicinal.mall.mall.demos.service.PhotoService;
 import org.apache.ibatis.annotations.Mapper;
@@ -29,6 +31,7 @@ public class PhotoController extends BaseController {
      * @return 返回图片上传后的基本信息，包括图片的id已经图片的url地址。
      */
     @PostMapping("/upload")
+    @TokenVerify(value = {RoleEnum.seller,RoleEnum.user},isNeedInfo = true)
     public ResultVO<Photo> uploadPhoto(@RequestPart("file") MultipartFile multipartFile) throws IOException {
         return success(photoService.uploadPhoto(multipartFile));
     }
@@ -38,7 +41,8 @@ public class PhotoController extends BaseController {
      * @param ids 待删除的图片ID列表
      * @return
      */
-    @DeleteMapping("/delete")
+    @DeleteMapping()
+    @TokenVerify(value = {RoleEnum.seller,RoleEnum.user},isNeedInfo = true)
     public ResultVO<Void> deletePhoto(@RequestBody List<Integer> ids){
         photoService.deletePhotoByIds(ids);
         return success();

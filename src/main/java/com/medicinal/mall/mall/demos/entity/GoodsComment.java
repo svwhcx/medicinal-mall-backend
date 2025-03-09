@@ -2,6 +2,7 @@ package com.medicinal.mall.mall.demos.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,7 +33,8 @@ public class GoodsComment {
     private Integer userId;
 
     // 评论的时间
-    private LocalDateTime startTim;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime startTime;
 
     // 商品的id
     private Integer goodsId;
@@ -50,5 +52,6 @@ public class GoodsComment {
     private String photos;
 
     // 商家对此评论的回复时间。
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime replyTime;
 }

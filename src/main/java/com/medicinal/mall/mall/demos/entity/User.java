@@ -2,10 +2,13 @@ package com.medicinal.mall.mall.demos.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 /**
  * @description
@@ -24,9 +27,8 @@ public class User {
     // 数据库的主键id
     private Integer id;
 
-
     // 用户登录的用户名
-    private String username;
+    private String account;
 
     // 用户的昵称
     private String nickname;
@@ -54,4 +56,9 @@ public class User {
 
     // 用户绑定的邮箱地址
     private String email;
+
+
+    // 用户的注册时间
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createTime;
 }

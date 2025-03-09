@@ -1,9 +1,12 @@
 package com.medicinal.mall.mall.demos.controller;
 
+import com.medicinal.mall.mall.demos.aop.annotation.TokenVerify;
 import com.medicinal.mall.mall.demos.common.ResultVO;
+import com.medicinal.mall.mall.demos.common.RoleEnum;
 import com.medicinal.mall.mall.demos.entity.ShoppingCar;
 import com.medicinal.mall.mall.demos.query.PageQuery;
 import com.medicinal.mall.mall.demos.service.ShoppingCarService;
+import com.medicinal.mall.mall.demos.vo.CartInfoVo;
 import com.medicinal.mall.mall.demos.vo.PageVo;
 import com.medicinal.mall.mall.demos.vo.ShoppingCarInfoVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +21,14 @@ import java.util.List;
  */
 
 @RestController
-@RequestMapping("/shoppingCar")
+@RequestMapping("/cart")
 public class ShoppingCarController extends BaseController{
 
     @Autowired
     private ShoppingCarService shoppingCarService;
 
-    @PostMapping("/add")
+    @PostMapping
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
     public ResultVO<Void> add(@RequestBody ShoppingCar shoppingCar){
         shoppingCarService.add(shoppingCar);
         return success();
@@ -35,9 +39,22 @@ public class ShoppingCarController extends BaseController{
      * @param pageQuery 分页参数
      * @return
      */
-    @GetMapping("/list")
-    public ResultVO<PageVo<ShoppingCarInfoVo>> listShoppingCar(PageQuery pageQuery){
-        return success(shoppingCarService.queryPage(pageQuery));
+//    @GetMapping("")
+//    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
+//    public ResultVO<PageVo<ShoppingCarInfoVo>> listShoppingCar(PageQuery pageQuery){
+//        return success(shoppingCarService.queryPage(pageQuery));
+//    }
+
+
+    /**
+     * 分页查询
+     * @param pageQuery
+     * @return
+     */
+    @GetMapping
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
+    public ResultVO<PageVo<CartInfoVo>> listShoppingCar(PageQuery pageQuery){
+        return success(shoppingCarService.queryByPage(pageQuery));
     }
 
     /**
@@ -46,6 +63,7 @@ public class ShoppingCarController extends BaseController{
      * @return
      */
     @DeleteMapping("/delete")
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
     public ResultVO<Void> deleteByIds(@RequestBody  List<Integer> ids){
         shoppingCarService.deleteById(ids);
         return success();
@@ -57,6 +75,7 @@ public class ShoppingCarController extends BaseController{
      * @return
      */
     @PutMapping("/update")
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
     public ResultVO<Void> update(@RequestBody ShoppingCar shoppingCar){
         shoppingCarService.updateById(shoppingCar);
         return success();

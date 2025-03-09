@@ -33,4 +33,9 @@ public class UserAddr {
 
     // 收件人的联系方式：目前就是邮箱、或者时手机号之类的(TODO 这里也要进行用户的敏感数据的一个脱敏操作）
     private String contactDetail;
+
+    /**
+     * 当前地址是否已经删除
+     */
+    private Boolean isDelete;
 }

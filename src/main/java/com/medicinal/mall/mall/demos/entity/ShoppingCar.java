@@ -28,9 +28,14 @@ public class ShoppingCar {
     private Integer userId;
 
     // 要购买的药材的id
-    private Integer medicinalId;
+    private Integer productId;
 
     // 预计购买的数量
     private Integer preBuyNum;
+
+    /**
+     * 购物车中的商品的sku的id信息
+     */
+    private Integer skuId;
 
 }

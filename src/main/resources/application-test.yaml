@@ -6,7 +6,7 @@ spring:
   # mysql 配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql:///medicine-mall?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql:///mall_data?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: 123456
     type: com.alibaba.druid.pool.DruidDataSource
@@ -54,9 +54,9 @@ logging:
 
 application:
   file:
-    path: D:/GraduationDesign/images/
+    path: D:/GraduationDesign/images1/
   url:
-    prefix: http://images.svwh.top/
+    prefix: http://localhost:8083/images/
 
 # 配置邮件发送账号
 mail-service:

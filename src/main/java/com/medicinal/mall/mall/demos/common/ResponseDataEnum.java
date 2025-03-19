@@ -30,6 +30,7 @@ public enum ResponseDataEnum {
     NO_DEFAULT_ADDR(1020, "没有默认地址!"),
     ORDER_HAS_REFUND(1021,"当前订单还有未处理的退款，禁止操作！"),
     VERIFY_CODE_EXPIRED(1022,"验证码已过期！"),
+    PRODUCT_DELETE_FORBBIT(1023,"已上架的商品禁止删除!")
     ;
 
     private Integer code;

@@ -120,6 +120,7 @@ public class ShoppingCarServiceImpl implements ShoppingCarService {
             Product product = productService.queryById(record.getProductId());
             CartInfoVo cartInfoVo =  new CartInfoVo();
             cartInfoVo.setImage(product.getImg());
+            cartInfoVo.setSkuId(record.getSkuId());
             cartInfoVo.setName(product.getName());
             cartInfoVo.setId(record.getId());
             cartInfoVo.setPrice(product.getPrice());

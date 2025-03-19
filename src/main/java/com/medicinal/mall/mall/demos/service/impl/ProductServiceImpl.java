@@ -94,6 +94,10 @@ public class ProductServiceImpl implements ProductService {
         productVo.setPhotoUrl(photoService.getPhotoUrlListByCombineIds(product.getPhotos()));
         // 查询SKU信息
         productVo.setSkus(skuService.listSkuByProductId(product.getId()));
+        // 计算库存
+        for (SKU sku : productVo.getSkus()) {
+            productVo.setStock(productVo.getStock() + sku.getStock());
+        }
         // 获取好评总数
         /// 获取所有的评论等级
         long allLevels = this.goodsCommentDao.queryAllComments(product.getId());
@@ -127,6 +131,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void update(ProductRequest medicinalMaterialRequest) {
         // 先检查当前的这个商品是否是当前的卖家的。
         Integer sellerId = UserInfoThreadLocal.get().getUserId();
@@ -148,6 +153,11 @@ public class ProductServiceImpl implements ProductService {
         product.setPhotos(sb.toString());
         // 保存修改。
         productDao.updateById(product);
+        for (SKU sku : medicinalMaterialRequest.getSkus()) {
+            sku.setId(null);
+            sku.setProductId(product.getId());
+            skuService.addSKU(sku);
+        }
     }
 
     @Override
@@ -155,6 +165,7 @@ public class ProductServiceImpl implements ProductService {
         // TODO 这里的时候，不管是商家还是用户，都可以进行类型的选择
         // 分页查询所有的
         LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Product::getStatus,1);
         // 判断当前的是否是seller
         if (UserInfoThreadLocal.get() != null && UserInfoThreadLocal.get().getRoleId().equals(RoleEnum.seller.getRoleId())) {
             queryWrapper.eq(Product::getSellerId, UserInfoThreadLocal.get().getUserId());
@@ -211,5 +222,21 @@ public class ProductServiceImpl implements ProductService {
         updateWrapper.eq(Product::getId, id);
         updateWrapper.set(Product::getStatus, status);
         this.productDao.update(updateWrapper);
+    }
+
+    @Override
+    public void delete(Integer id) {
+        // 只有未上架得商品可以删除
+        Product product = productDao.selectById(id);
+        if (product == null){
+            throw new ParamException(ResponseDataEnum.PARAM_WRONG);
+        }
+        if (product.getStatus() != 0){
+            throw new ParamException(ResponseDataEnum.PRODUCT_DELETE_FORBBIT);
+        }
+        LambdaUpdateWrapper<Product> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(Product::getIsDelete,true)
+                        .eq(Product::getId,id);
+        productDao.update(updateWrapper );
     }
 }

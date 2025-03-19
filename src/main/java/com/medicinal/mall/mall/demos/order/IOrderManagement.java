@@ -14,7 +14,7 @@ public interface IOrderManagement {
      * 订单默认的超时时间<p>
      * 默认可超时：15分钟.
      */
-    long DEFAULT_EXPIRE_TIME = 1000*60*15;
+    long DEFAULT_EXPIRE_TIME = 1000*60*1;
 
     /**
      * 添加一个过期的订单任务到队列中去。

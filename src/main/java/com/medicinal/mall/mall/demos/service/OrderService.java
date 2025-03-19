@@ -104,4 +104,12 @@ public interface OrderService {
      * @param orderId 订单的id信息
      */
     void deliverOrder(Integer orderId);
+
+    /**
+     * 获取一个订单的剩余过期时间
+     * @param orderID
+     * @return
+     */
+    Long getLeftTime(String orderCode);
+
 }

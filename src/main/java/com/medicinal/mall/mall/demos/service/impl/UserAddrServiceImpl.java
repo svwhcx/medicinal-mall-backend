@@ -50,7 +50,7 @@ public class UserAddrServiceImpl implements UserAddrService {
         LambdaQueryWrapper<UserAddr> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserAddr::getUserId, userId);
 
-        if (userAddrDao.selectCount(queryWrapper) == 0) {
+        if (userAddrDao.selectCount(queryWrapper) == 0 || userAddr.getIsMain()) {
             userService.setMainAddr(userAddr.getId());
         }
     }

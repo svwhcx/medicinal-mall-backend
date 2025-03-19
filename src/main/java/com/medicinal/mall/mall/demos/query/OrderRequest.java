@@ -19,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderRequest {
 
+
     /**
      * 当前批次的订单中的单独的商品订单信息
      */

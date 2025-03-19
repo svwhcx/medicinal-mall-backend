@@ -128,4 +128,10 @@ public class ProductController extends BaseController {
         return success();
     }
 
+    @DeleteMapping("/{id}")
+    public ResultVO<Void> deleteMedicinalMaterial(@PathVariable("id") Integer id){
+        productService.delete(id);
+        return success();
+    }
+
 }

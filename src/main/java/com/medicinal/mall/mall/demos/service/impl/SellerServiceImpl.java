@@ -8,7 +8,6 @@ import com.medicinal.mall.mall.demos.common.RoleEnum;
 import com.medicinal.mall.mall.demos.common.UserInfoThreadLocal;
 import com.medicinal.mall.mall.demos.dao.SellerDao;
 import com.medicinal.mall.mall.demos.entity.Seller;
-import com.medicinal.mall.mall.demos.entity.User;
 import com.medicinal.mall.mall.demos.exception.ParamException;
 import com.medicinal.mall.mall.demos.exception.UserLogFail;
 import com.medicinal.mall.mall.demos.query.UserRequest;
@@ -43,8 +42,8 @@ public class SellerServiceImpl implements SellerService {
     public UserLoginVo userLogin(UserRequest userRequest) {
 
         // 先验证图片验证码是否正确
-        IVerifyCode iVerifyCode = verifyCodeContext.getIVerifyCode(userRequest.getVerifyType());
-        if (!iVerifyCode.checkVerifyCode(new VerifyCodeRequest(userRequest.getPictureUUID(), userRequest.getVerifyCode(), userRequest.getVerifyType(), null))){
+        IVerifyCode iVerifyCode = verifyCodeContext.getIVerifyCode(VerifyCodeConstant.PHOTO_VERIFY);
+        if (!iVerifyCode.checkVerifyCode(new VerifyCodeRequest(userRequest.getPictureUUID(), userRequest.getChaptchaCode(), VerifyCodeConstant.PHOTO_VERIFY, null))){
             throw new ParamException(ResponseDataEnum.VERIFICATION_ERROR);
         }
         // 先对密码进行加密验证
@@ -77,7 +76,7 @@ public class SellerServiceImpl implements SellerService {
         }
         // 如果没有注册则验证验证码是否正确
         Boolean verifyRes = verifyCodeContext.getIVerifyCode(VerifyCodeConstant.EMAIL_VERIFY)
-                .checkVerifyCode(new VerifyCodeRequest(userRequest.getEmail(), userRequest.getVerifyCode(), VerifyCodeConstant.EMAIL_VERIFY,null));
+                .checkVerifyCode(new VerifyCodeRequest(userRequest.getEmail(), userRequest.getEmailCode(), VerifyCodeConstant.EMAIL_VERIFY,null));
         if (!verifyRes){
             throw new ParamException(ResponseDataEnum.VERIFICATION_ERROR);
         }

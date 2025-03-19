@@ -99,4 +99,10 @@ public class Product {
      * 比如颜色，颜色的大小之类的。
      */
     private String specifications;
+
+    /**
+     * 是否删除
+     */
+    @TableField(exist = false)
+    private Integer isDelete;
 }

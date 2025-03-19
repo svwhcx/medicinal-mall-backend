@@ -1,5 +1,6 @@
 package com.medicinal.mall.mall.demos.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -38,4 +39,10 @@ public class UserAddr {
      * 当前地址是否已经删除
      */
     private Boolean isDelete;
+
+    /**
+     * 是否是默认的地址
+     */
+    @TableField(exist = false)
+    private Boolean isMain;
 }

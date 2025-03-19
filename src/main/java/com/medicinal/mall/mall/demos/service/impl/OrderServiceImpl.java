@@ -19,6 +19,7 @@ import com.medicinal.mall.mall.demos.query.RefundPageRequest;
 import com.medicinal.mall.mall.demos.query.RefundRequest;
 import com.medicinal.mall.mall.demos.service.OrderRefundService;
 import com.medicinal.mall.mall.demos.service.UserService;
+import com.medicinal.mall.mall.demos.util.OrderCodeUtil;
 import com.medicinal.mall.mall.demos.vo.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,9 @@ public class OrderServiceImpl implements OrderRefundService {
 
     @Autowired
     private GoodsCommentDao goodsCommentDao;
+
+    @Autowired
+    private SkuDao skuDao;
 
 
     @Override
@@ -108,6 +112,7 @@ public class OrderServiceImpl implements OrderRefundService {
      * @param orderPageRequest
      * @return
      */
+    @Override
     public PageVo<SingleOrderVo> sellerQueryOrders(OrderPageRequest orderPageRequest) {
         Integer sellerID = UserInfoThreadLocal.get().getUserId();
         LambdaQueryWrapper<Order> queryWrapper = new LambdaQueryWrapper<>();
@@ -278,7 +283,7 @@ public class OrderServiceImpl implements OrderRefundService {
             productQueryWrapper.eq(Product::getId, order.getGoodsId())
                     .select(Product::getImg, Product::getName, Product::getPrice, Product::getId);
             Product product = this.productDao.selectOne(productQueryWrapper);
-            totalAmount = totalAmount.add(product.getPrice());
+            totalAmount = totalAmount.add(order.getPrice());
             OrderProductVo orderProductVo = new OrderProductVo();
             orderProductVo.setProductId(product.getId());
             orderProductVo.setImg(product.getImg());
@@ -322,39 +327,49 @@ public class OrderServiceImpl implements OrderRefundService {
     @Transactional
     public OrderVo add(OrderRequest orderRequest) {
         Integer userId = UserInfoThreadLocal.get().getUserId();
-        String orderCode = UUID.randomUUID().toString();
+        String orderCode = OrderCodeUtil.generate();
         List<Order> orderList = orderRequest.getOrders();
         // 同一批次的多个商品订单信息，共享同一个订单编号
         orderList.forEach(order -> {
             LambdaQueryWrapper<Product> productQueryWrapper = new LambdaQueryWrapper<>();
-            productQueryWrapper.eq(Product::getId, order.getGoodsId())
-                    .select(Product::getSellerId)
-                    .select(Product::getPrice);
+            productQueryWrapper.eq(Product::getId, order.getGoodsId());
+//                    .select(Product::getSellerId)
+//                    .select(Product::getPrice);
             Product product = this.productDao.selectOne(productQueryWrapper);
             order.setSellerId(product.getSellerId());
             // 设置价格
-            // TODO 这里的价格应该是SKU对应的单价再来计算数量
-            order.setPrice(product.getPrice().multiply(BigDecimal.valueOf(order.getBuyNum())));
+            SKU sku = skuDao.selectById(order.getSkuId());
+            // 先判断商品的库存是否足够
+            if (sku.getStock() < order.getBuyNum()) {
+                throw new ParamException("商品: "+ product.getName() + "没有足够的库存!");
+            }
+            order.setPrice(sku.getPrice().multiply(BigDecimal.valueOf(order.getBuyNum())));
             order.setOrderCode(orderCode);
             order.setCreateTime(LocalDateTime.now());
             order.setInvalidationTime(System.currentTimeMillis() + IOrderManagement.DEFAULT_EXPIRE_TIME);
             order.setUserId(userId);
             order.setStatus(OrderStatusConstant.CREATED);
             order.setAddrId(orderRequest.getAddressId());
-        });
 
-        // 进行锁单的操作
-        // 在创建多个订单之前，先去预扣除对应商品的库存信息
-        orderList.forEach(order -> {
-            // TODO 订单数量溢出检查
-            // TODO 后续的优化方案，可以建立多个订单池
-            // TODO 来应对高并发库存减为负的场景
-            LambdaUpdateWrapper<Product> productUpdateWrapper = new LambdaUpdateWrapper<>();
-            productUpdateWrapper.eq(Product::getId, order.getGoodsId());
-            productUpdateWrapper.setSql("stock = stock - " + order.getBuyNum());
-//            productUpdateWrapper.setSql("stock = stock - " + order.getBuyNum() + "where stock - num > 0");
-            this.productDao.update(productUpdateWrapper);
+            // 提前锁单，进行扣减库存的操作
+            LambdaUpdateWrapper<SKU> skuUpdateWrapper = new LambdaUpdateWrapper<>();
+            skuUpdateWrapper.eq(SKU::getId, order.getSkuId());
+            skuUpdateWrapper.setSql("stock = stock - " + order.getBuyNum());
+            skuDao.update(skuUpdateWrapper);
         });
+//
+//        // 进行锁单的操作
+//        // 在创建多个订单之前，先去预扣除对应商品的库存信息
+//        orderList.forEach(order -> {
+//            // TODO 订单数量溢出检查
+//            // TODO 后续的优化方案，可以建立多个订单池
+//            // TODO 来应对高并发库存减为负的场景
+//            LambdaUpdateWrapper<Product> productUpdateWrapper = new LambdaUpdateWrapper<>();
+//            productUpdateWrapper.eq(Product::getId, order.getGoodsId());
+//            productUpdateWrapper.setSql("stock = stock - " + order.getBuyNum());
+////            productUpdateWrapper.setSql("stock = stock - " + order.getBuyNum() + "where stock - num > 0");
+//            this.productDao.update(productUpdateWrapper);
+//        });
         // 一起插入
         this.orderDao.insert(orderList);
         OrderVo orderVo = new OrderVo();
@@ -438,7 +453,7 @@ public class OrderServiceImpl implements OrderRefundService {
         LambdaQueryWrapper<Order> orderQueryWrapper = new LambdaQueryWrapper<>();
         orderQueryWrapper
                 .eq(Order::getId, orderId)
-                .select(Order::getGoodsId, Order::getBuyNum);
+                .select(Order::getGoodsId, Order::getBuyNum,Order::getSkuId);
         Order order = this.orderDao.selectOne(orderQueryWrapper);
         // 进行回退操作。
         recoverOrderStock(order);
@@ -454,17 +469,35 @@ public class OrderServiceImpl implements OrderRefundService {
         this.orderDao.update(orderUpdateWrapper);
     }
 
+    @Override
+    public Long getLeftTime(String orderCode) {
+        LambdaQueryWrapper<Order> orderLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        orderLambdaQueryWrapper.eq(Order::getOrderCode, orderCode)
+                .select(Order::getInvalidationTime);
+        List<Order> orderList = this.orderDao.selectList(orderLambdaQueryWrapper);
+        if (orderList.isEmpty()){
+            return -1L;
+        }
+        return (orderList.get(0).getInvalidationTime() - System.currentTimeMillis())/1000;
+    }
+
     /**
      * 恢复一个商品的库存
      *
      * @param order 某一个具体的订单，包含商品的id和购买的数据信息。
      */
     private void recoverOrderStock(Order order) {
-        // 恢复商品的库存
-        LambdaUpdateWrapper<Product> productUpdateWrapper = new LambdaUpdateWrapper<>();
-        productUpdateWrapper.eq(Product::getId, order.getGoodsId())
+        // 更新的是SKU中的库存数据
+        LambdaUpdateWrapper<SKU> skuUpdateWrapper = new LambdaUpdateWrapper<>();
+        skuUpdateWrapper.eq(SKU::getId, order.getSkuId())
                 .setSql("stock = stock + " + order.getBuyNum());
-        this.productDao.update(productUpdateWrapper);
+        skuDao.update(skuUpdateWrapper);
+//        // 恢复商品的库存
+//        LambdaUpdateWrapper<Product> productUpdateWrapper = new LambdaUpdateWrapper<>();
+//        productUpdateWrapper.eq(Product::getId, order.getGoodsId())
+//                .setSql("stock = stock + " + order.getBuyNum());
+//        // 这里应该是更新的SKU中的库存
+//        this.productDao.update(productUpdateWrapper);
     }
 
     @Override

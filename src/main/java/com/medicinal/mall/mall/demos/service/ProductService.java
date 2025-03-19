@@ -59,4 +59,12 @@ public interface ProductService {
      */
     void modifyStatus(Integer id, Integer status);
 
+    /**
+     * 删除一个商品
+     * @param id 商品id
+     */
+    void delete(Integer id);
+
+
+
 }

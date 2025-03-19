@@ -46,10 +46,10 @@ public class UserServiceImpl implements UserService {
     public UserLoginVo userLogin(UserRequest userRequest) {
 
         // 先验证图片验证码是否正确
-        IVerifyCode iVerifyCode = verifyCodeContext.getIVerifyCode(userRequest.getVerifyType());
-        if (!iVerifyCode.checkVerifyCode(new VerifyCodeRequest(userRequest.getPictureUUID(), userRequest.getVerifyCode(), userRequest.getVerifyType(), null))) {
-            throw new ParamException(ResponseDataEnum.VERIFICATION_ERROR);
-        }
+//        IVerifyCode iVerifyCode = verifyCodeContext.getIVerifyCode(VerifyCodeConstant.PHOTO_VERIFY);
+//        if (!iVerifyCode.checkVerifyCode(new VerifyCodeRequest(userRequest.getPictureUUID(), userRequest.getChaptchaCode(), VerifyCodeConstant.PHOTO_VERIFY, null))) {
+//            throw new ParamException(ResponseDataEnum.VERIFICATION_ERROR);
+//        }
 
         // 先对密码进行加密验证
         userRequest.setPassword(PasswordUtils.encryption(userRequest.getPassword()));
@@ -79,8 +79,13 @@ public class UserServiceImpl implements UserService {
         }
         // 如果没有注册则验证验证码是否正确
         Boolean verifyRes = verifyCodeContext.getIVerifyCode(VerifyCodeConstant.EMAIL_VERIFY)
-                .checkVerifyCode(new VerifyCodeRequest(userRequest.getEmail(), userRequest.getVerifyCode(), VerifyCodeConstant.EMAIL_VERIFY, null));
+                .checkVerifyCode(new VerifyCodeRequest(userRequest.getEmail(), userRequest.getEmailCode(), VerifyCodeConstant.EMAIL_VERIFY, null));
         if (!verifyRes) {
+            throw new ParamException(ResponseDataEnum.VERIFICATION_ERROR);
+        }
+        // 验证图片验证码
+        if (!verifyCodeContext.getIVerifyCode(VerifyCodeConstant.PHOTO_VERIFY)
+                .checkVerifyCode(new VerifyCodeRequest(userRequest.getPictureUUID(), userRequest.getChaptchaCode(), VerifyCodeConstant.PHOTO_VERIFY, null))) {
             throw new ParamException(ResponseDataEnum.VERIFICATION_ERROR);
         }
         // 用户的注册操作，先验证是否已经有用户注册该账号了
@@ -89,9 +94,9 @@ public class UserServiceImpl implements UserService {
         }
 
         // 然后用户注册时的密码强度的一个校验部分
-        if (!PasswordUtils.isStrong(userRequest.getPassword())) {
-            throw new UserLogFail(ResponseDataEnum.PASSWORD_NOT_STRONG);
-        }
+//        if (!PasswordUtils.isStrong(userRequest.getPassword())) {
+//            throw new UserLogFail(ResponseDataEnum.PASSWORD_NOT_STRONG);
+//        }
         // 都通过了，使用加密手段对用户的密码进行加密存储.
         User user = new User();
         user.setAccount(userRequest.getAccount());
@@ -122,9 +127,9 @@ public class UserServiceImpl implements UserService {
             throw new ParamException(ResponseDataEnum.VERIFICATION_ERROR);
         }
         // 校验一下用户设置的新密码的强度
-        if (!PasswordUtils.isStrong(findPasswordCmd.getNewPwd())) {
-            throw new ParamException(ResponseDataEnum.PASSWORD_NOT_STRONG);
-        }
+//        if (!PasswordUtils.isStrong(findPasswordCmd.getNewPwd())) {
+//            throw new ParamException(ResponseDataEnum.PASSWORD_NOT_STRONG);
+//        }
         // 如果验证码正确，则根据邮箱修改对应的用户的登录密码
         LambdaUpdateWrapper<User> userLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
         userLambdaUpdateWrapper.eq(User::getEmail, findPasswordCmd.getEmail());

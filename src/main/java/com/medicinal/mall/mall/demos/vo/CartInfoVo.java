@@ -53,4 +53,6 @@ public class CartInfoVo {
      * 库存
      */
     private Integer stock;
+
+    private Integer skuId;
 }

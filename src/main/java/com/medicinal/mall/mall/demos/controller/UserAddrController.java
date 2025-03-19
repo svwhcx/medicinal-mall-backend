@@ -78,9 +78,9 @@ public class UserAddrController extends BaseController {
      * @param userAddrId 删除的目标地址的id
      * @return
      */
-    @DeleteMapping("")
+    @DeleteMapping("{userAddrId}")
     @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
-    public ResultVO<Void> deleteUserAddr(Integer userAddrId){
+    public ResultVO<Void> deleteUserAddr(@PathVariable("userAddrId") Integer userAddrId){
         this.userAddrService.deleteUserAddr(userAddrId);
         return success();
     }

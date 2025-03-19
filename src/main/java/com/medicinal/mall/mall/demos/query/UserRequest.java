@@ -29,7 +29,12 @@ public class UserRequest {
     private String phoneNumber;
 
     // 验证码
-    private String verifyCode;
+    private String emailCode;
+
+    /**
+     * 图片验证码
+     */
+    private String chaptchaCode;
 
     /**
      * 验证类型

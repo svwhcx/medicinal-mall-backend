@@ -138,6 +138,17 @@ public class OrderController extends BaseController {
 
 
     /**
+     * 获取一个订单的剩余过期时间
+     * @param orderCode 订单的编号
+     * @return
+     */
+    @GetMapping("/leftTime/{orderCode}")
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
+    public ResultVO<Long> getLeftTime(@PathVariable("orderCode") String orderCode){
+        return success(orderService.getLeftTime(orderCode));
+    }
+
+    /**
      * TODO<p>
      * 根据订单编号来进行支付操作。
      * @param orderVo 订单编号的详细信息。

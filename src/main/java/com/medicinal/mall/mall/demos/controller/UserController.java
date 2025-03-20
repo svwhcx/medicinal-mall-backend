@@ -7,8 +7,10 @@ import com.medicinal.mall.mall.demos.common.ResultVO;
 import com.medicinal.mall.mall.demos.common.RoleEnum;
 import com.medicinal.mall.mall.demos.common.UserInfoThreadLocal;
 import com.medicinal.mall.mall.demos.entity.User;
+import com.medicinal.mall.mall.demos.query.UserPageQuery;
 import com.medicinal.mall.mall.demos.query.UserRequest;
 import com.medicinal.mall.mall.demos.service.UserService;
+import com.medicinal.mall.mall.demos.vo.PageVo;
 import com.medicinal.mall.mall.demos.vo.UserLoginVo;
 import com.svwh.parametercheck.annotation.MustEmail;
 import com.svwh.parametercheck.annotation.NotNull;
@@ -113,6 +115,52 @@ public class UserController extends BaseController {
     @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
     public ResultVO<Void> changePassword(@RequestBody ChangePasswordCmd changePasswordCmd){
         userService.changePassword(changePasswordCmd);
+        return success();
+    }
+
+    /**
+     * 管理员获取用户的列表
+     * @param userPageQuery 用户分页条件
+     * @return
+     */
+    @GetMapping("/list")
+    public ResultVO<PageVo<User>> list(UserPageQuery userPageQuery){
+        PageVo<User> list = userService.list(userPageQuery);
+        // 用户密码脱敏处理
+        list.getList().forEach(user -> user.setPassword("***"));
+        return success(list);
+    }
+
+    @PutMapping("/{id}/status")
+    public ResultVO<Void> modifyStatus(@PathVariable("id") Integer id,@RequestBody User user){
+        userService.setUserStatus(id,user.getStatus());
+        return success();
+    }
+
+    /**
+     * 管理员根据用户的id修改用户的个人信息
+     * @param id 用户的id
+     * @param user 用户的个人信息
+     * @return
+     */
+    @PutMapping("/edit/{id}")
+    public ResultVO<Void> edit(@PathVariable("id") Integer id,@RequestBody User user){
+        user.setId(id);
+        userService.updateUserById(user);
+        return success();
+    }
+
+    /**
+     * 管理员重置用户的密码
+     * @param id 用户的id
+     * @return
+     */
+    @PutMapping("/{id}/password/reset")
+    public ResultVO<Void> resetPassword(@PathVariable("id") Integer id){
+        User user = new User();
+        user.setId(id);
+        user.setPassword("123456");
+        userService.updateUserById(user);
         return success();
     }
 }

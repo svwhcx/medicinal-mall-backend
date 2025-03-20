@@ -3,7 +3,9 @@ package com.medicinal.mall.mall.demos.service;
 import com.medicinal.mall.mall.demos.command.ChangePasswordCmd;
 import com.medicinal.mall.mall.demos.command.FindPasswordCmd;
 import com.medicinal.mall.mall.demos.entity.User;
+import com.medicinal.mall.mall.demos.query.UserPageQuery;
 import com.medicinal.mall.mall.demos.query.UserRequest;
+import com.medicinal.mall.mall.demos.vo.PageVo;
 import com.medicinal.mall.mall.demos.vo.UserLoginVo;
 
 /**
@@ -72,4 +74,19 @@ public interface UserService {
      * @return
      */
     Integer queryAddrByUserId(Integer userID);
+
+    PageVo<User> list(UserPageQuery userPageQuery);
+
+    /**
+     * 管理员根据用户id修改用户的个人信息
+     * @param user 用户信息
+     */
+    void updateUserById(User user);
+
+    /**
+     * 根据id修改用户的状态
+     * @param id 用户的id
+     * @param status 目标状态
+     */
+    void setUserStatus(Integer id, Integer status);
 }

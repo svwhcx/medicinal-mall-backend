@@ -41,7 +41,9 @@ public interface DashboardDao {
     /**
      * 查询商家今日的销售总额，包含多个商品的，就是用户已经付款的
      */
-    @Select("select sum(price)  from `order` where seller_id = #{sellerId} and update_time >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) and `status` = 2")
-    long selectTodaySales(Integer sellerId);
+    @Select("select sum(price)  from `order` where seller_id = #{sellerId} and DATE(pay_time) = CURDATE()")
+    Long selectTodaySales(Integer sellerId);
 
+    @Select("select sum(price) from `order` where seller_id=#{sellerId} and DATE(pay_time) = DATE_SUB(CURDATE(),INTERVAL 7 day) ")
+    Long selectLastWeekTodaySales(Integer sellerId);
 }

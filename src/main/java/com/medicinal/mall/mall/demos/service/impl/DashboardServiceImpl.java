@@ -116,6 +116,23 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public SmallData getTodaySales() {
-        return null;
+        Integer sellerId = UserInfoThreadLocal.get().getUserId();
+        // 获取今日的订单金额
+        Long l = dashboardDao.selectTodaySales(sellerId);
+        Long l1 = dashboardDao.selectLastWeekTodaySales(sellerId);
+        if (l == null){
+            l = 0L;
+        }
+
+        SmallData smallData = new SmallData();
+        smallData.setBigNum(String.valueOf(l));
+        // 计算周同比
+        if (l1 == null){
+            smallData.setSmallNum("100%");
+        }else{
+            smallData.setSmallNum((l - l1) / l1 * 100 +"%");
+        }
+        // 获取上一周同一天的订单金额
+        return smallData;
     }
 }

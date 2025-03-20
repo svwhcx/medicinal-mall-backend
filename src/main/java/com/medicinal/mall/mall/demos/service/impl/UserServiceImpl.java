@@ -2,11 +2,13 @@ package com.medicinal.mall.mall.demos.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.medicinal.mall.mall.demos.command.ChangePasswordCmd;
 import com.medicinal.mall.mall.demos.command.FindPasswordCmd;
 import com.medicinal.mall.mall.demos.common.ResponseDataEnum;
 import com.medicinal.mall.mall.demos.common.RoleEnum;
 import com.medicinal.mall.mall.demos.common.UserInfoThreadLocal;
+import com.medicinal.mall.mall.demos.query.UserPageQuery;
 import com.medicinal.mall.mall.demos.query.UserRequest;
 import com.medicinal.mall.mall.demos.token.TokenBuilder;
 import com.medicinal.mall.mall.demos.token.TokenInfo;
@@ -20,10 +22,12 @@ import com.medicinal.mall.mall.demos.query.VerifyCodeRequest;
 import com.medicinal.mall.mall.demos.service.UserService;
 import com.medicinal.mall.mall.demos.util.PasswordUtils;
 import com.medicinal.mall.mall.demos.verifycode.context.VerifyCodeContext;
+import com.medicinal.mall.mall.demos.vo.PageVo;
 import com.medicinal.mall.mall.demos.vo.UserInfoVo;
 import com.medicinal.mall.mall.demos.vo.UserLoginVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 
@@ -187,5 +191,34 @@ public class UserServiceImpl implements UserService {
         queryWrapper.eq(User::getId, userID)
                 .select(User::getMainAddrId);
         return this.userDao.selectOne(queryWrapper).getMainAddrId();
+    }
+
+    @Override
+    public PageVo<User> list(UserPageQuery userPageQuery) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        if (userPageQuery.getStatus() != null) {
+            queryWrapper.eq(User::getStatus, userPageQuery.getStatus());
+        }
+        if (StringUtils.hasLength(userPageQuery.getUsername())) {
+            queryWrapper.like(User::getAccount, userPageQuery.getUsername());
+        }
+        return PageVo.build(this.userDao.selectPage(new Page<>(userPageQuery.getPageNum(), userPageQuery.getPageSize()), queryWrapper));
+    }
+
+    @Override
+    public void updateUserById(User user) {
+        // 如果用户的密码不为空，则对密码进行加密
+        if (user.getPassword() != null){
+            user.setPassword(PasswordUtils.encryption(user.getPassword()));
+        }
+        userDao.updateById(user);
+    }
+
+    @Override
+    public void setUserStatus(Integer id, Integer status) {
+        LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(User::getId, id);
+        updateWrapper.set(User::getStatus, status);
+        this.userDao.update(updateWrapper);
     }
 }

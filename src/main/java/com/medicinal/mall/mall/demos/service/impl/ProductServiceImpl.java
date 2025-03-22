@@ -10,6 +10,7 @@ import com.medicinal.mall.mall.demos.common.UserInfoThreadLocal;
 import com.medicinal.mall.mall.demos.dao.CategoryDao;
 import com.medicinal.mall.mall.demos.dao.GoodsCommentDao;
 import com.medicinal.mall.mall.demos.dao.ProductDao;
+import com.medicinal.mall.mall.demos.dao.SkuDao;
 import com.medicinal.mall.mall.demos.entity.Category;
 import com.medicinal.mall.mall.demos.entity.GoodsComment;
 import com.medicinal.mall.mall.demos.entity.Product;
@@ -26,8 +27,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * @description
@@ -53,6 +59,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private GoodsCommentDao goodsCommentDao;
+
+    @Autowired
+    private SkuDao skuDao;
 
     @Override
     @Transactional
@@ -105,7 +114,7 @@ public class ProductServiceImpl implements ProductService {
         Long commentNum = this.goodsCommentDao.selectCount(new LambdaQueryWrapper<GoodsComment>().eq(GoodsComment::getGoodsId, product.getId()));
         // 计算平均的评论等级
         productVo.setRating(0);
-        if (commentNum != 0){
+        if (commentNum != 0) {
             productVo.setRating((int) (allLevels / commentNum));
         }
         return productVo;
@@ -154,9 +163,14 @@ public class ProductServiceImpl implements ProductService {
         // 保存修改。
         productDao.updateById(product);
         for (SKU sku : medicinalMaterialRequest.getSkus()) {
-            sku.setId(null);
-            sku.setProductId(product.getId());
-            skuService.addSKU(sku);
+            if (sku.getId() != null) {
+                skuDao.updateById(sku);
+            } else {
+                sku.setId(null);
+                sku.setProductId(product.getId());
+                skuService.addSKU(sku);
+            }
+
         }
     }
 
@@ -165,7 +179,7 @@ public class ProductServiceImpl implements ProductService {
         // TODO 这里的时候，不管是商家还是用户，都可以进行类型的选择
         // 分页查询所有的
         LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Product::getStatus,1);
+        queryWrapper.eq(Product::getStatus, 1);
         // 判断当前的是否是seller
         if (UserInfoThreadLocal.get() != null && UserInfoThreadLocal.get().getRoleId().equals(RoleEnum.seller.getRoleId())) {
             queryWrapper.eq(Product::getSellerId, UserInfoThreadLocal.get().getUserId());
@@ -204,7 +218,25 @@ public class ProductServiceImpl implements ProductService {
             // 对于名称是模糊匹配
             queryWrapper.like(Product::getName, "%" + productPageRequest.getName() + "%");
         }
-        return PageVo.build(this.productDao.selectPage(new Page<>(productPageRequest.getPageNum(), productPageRequest.getPageSize()), queryWrapper));
+        Page<Product> productPage = this.productDao.selectPage(new Page<>(productPageRequest.getPageNum(), productPageRequest.getPageSize()), queryWrapper);
+        if (!CollectionUtils.isEmpty(productPage.getRecords())) {
+            List<Integer> collect = productPage.getRecords().stream().map(Product::getId).collect(Collectors.toList());
+            LambdaQueryWrapper<SKU> skuLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            skuLambdaQueryWrapper.in(SKU::getProductId, collect)
+                    .select(SKU::getProductId, SKU::getStock);
+            List<SKU> skus = skuDao.selectList(skuLambdaQueryWrapper);
+            Map<Integer, List<SKU>> skukMaps = skus.stream().collect(Collectors.groupingBy(SKU::getProductId));
+            productPage.getRecords().forEach(product -> {
+                if (skukMaps.get(product.getId()) != null) {
+                    int num = 0;
+                    for (SKU sku : skukMaps.get(product.getId())) {
+                        num += sku.getStock();
+                    }
+                    product.setStock(num);
+                }
+            });
+        }
+        return PageVo.build(productPage);
     }
 
     @Override
@@ -228,15 +260,15 @@ public class ProductServiceImpl implements ProductService {
     public void delete(Integer id) {
         // 只有未上架得商品可以删除
         Product product = productDao.selectById(id);
-        if (product == null){
+        if (product == null) {
             throw new ParamException(ResponseDataEnum.PARAM_WRONG);
         }
-        if (product.getStatus() != 0){
+        if (product.getStatus() != 0) {
             throw new ParamException(ResponseDataEnum.PRODUCT_DELETE_FORBBIT);
         }
         LambdaUpdateWrapper<Product> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.set(Product::getIsDelete,true)
-                        .eq(Product::getId,id);
-        productDao.update(updateWrapper );
+        updateWrapper.set(Product::getIsDelete, true)
+                .eq(Product::getId, id);
+        productDao.update(updateWrapper);
     }
 }

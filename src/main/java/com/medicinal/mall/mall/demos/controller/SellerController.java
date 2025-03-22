@@ -1,6 +1,7 @@
 package com.medicinal.mall.mall.demos.controller;
 
 import com.medicinal.mall.mall.demos.aop.annotation.TokenVerify;
+import com.medicinal.mall.mall.demos.command.ChangePasswordCmd;
 import com.medicinal.mall.mall.demos.command.FindPasswordCmd;
 import com.medicinal.mall.mall.demos.common.ResultVO;
 import com.medicinal.mall.mall.demos.common.RoleEnum;
@@ -100,5 +101,19 @@ public class SellerController extends BaseController {
     @TokenVerify(value = RoleEnum.seller,isNeedInfo = true)
     public ResultVO<Seller> getSellerInfo(){
         return success(this.sellerService.getInfo());
+    }
+
+
+
+    /**
+     * 商家修改自己的密码
+     * @param changePasswordCmd 修改密码条件信息
+     * @return 无
+     */
+    @PutMapping("/password")
+    @TokenVerify(value = RoleEnum.seller,isNeedInfo = true)
+    public ResultVO<Void> changePassword(@RequestBody ChangePasswordCmd changePasswordCmd){
+        sellerService.changePassword(changePasswordCmd);
+        return success();
     }
 }

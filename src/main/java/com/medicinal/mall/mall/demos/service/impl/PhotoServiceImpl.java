@@ -110,14 +110,21 @@ public class PhotoServiceImpl implements PhotoService {
 
     @Override
     public List<String> getPhotoUrlListByCombineIds(String ids) {
-        if (ids == null) return Collections.emptyList();
+        if (ids == null) {
+            return Collections.emptyList();
+        }
         // 处理ids的分割
         String[] split = ids.split(",");
         List<Integer> photoIds = new ArrayList<>();
         for (String s : split) {
-            if (s.isEmpty()) continue;
+            if (s.isEmpty()) {
+                continue;
+            }
             Integer id = Integer.parseInt(s);
             photoIds.add(id);
+        }
+        if (photoIds.isEmpty()){
+            return Collections.emptyList();
         }
         LambdaQueryWrapper<Photo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(Photo::getId, photoIds).select(Photo::getAddr);

@@ -54,7 +54,7 @@ public class DashboardController extends BaseController {
     @GetMapping("/allStock")
     @TokenVerify(value = RoleEnum.seller,isNeedInfo = true)
     public ResultVO<SmallData> getAllStock(){
-        return success(null);
+        return success(this.dashboardService.getAllStock());
     }
 
 
@@ -77,6 +77,16 @@ public class DashboardController extends BaseController {
     @TokenVerify(value = RoleEnum.seller,isNeedInfo = true)
     public ResultVO<List<OrderStatusVo>> getLastWeekSales(){
         return success(this.dashboardService.getLastWeekOrderSales());
+    }
+
+    /**
+     * 商家获取最近一周的销售数量和销售的总的金额。
+     * @return
+     */
+    @GetMapping("/lastMonthSales")
+    @TokenVerify(value = RoleEnum.seller,isNeedInfo = true)
+    public ResultVO<List<OrderStatusVo>> getLastMonthSales(){
+        return success(this.dashboardService.getLastMonthOrderSales());
     }
 
 

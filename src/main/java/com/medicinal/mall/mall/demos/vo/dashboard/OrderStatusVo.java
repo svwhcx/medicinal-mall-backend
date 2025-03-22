@@ -1,5 +1,6 @@
 package com.medicinal.mall.mall.demos.vo.dashboard;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,6 +35,7 @@ public class OrderStatusVo {
     /**
      * 时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime keyTime;
 
     /**

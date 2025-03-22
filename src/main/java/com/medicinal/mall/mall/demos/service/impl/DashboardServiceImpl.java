@@ -2,12 +2,10 @@ package com.medicinal.mall.mall.demos.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.medicinal.mall.mall.demos.common.UserInfoThreadLocal;
-import com.medicinal.mall.mall.demos.dao.CategoryDao;
-import com.medicinal.mall.mall.demos.dao.DashboardDao;
-import com.medicinal.mall.mall.demos.dao.OrderDao;
-import com.medicinal.mall.mall.demos.dao.ProductDao;
+import com.medicinal.mall.mall.demos.dao.*;
 import com.medicinal.mall.mall.demos.entity.Category;
 import com.medicinal.mall.mall.demos.entity.Product;
+import com.medicinal.mall.mall.demos.entity.SKU;
 import com.medicinal.mall.mall.demos.service.DashboardService;
 import com.medicinal.mall.mall.demos.vo.dashboard.DashboardProduct;
 import com.medicinal.mall.mall.demos.vo.dashboard.OrderStatusVo;
@@ -39,6 +37,9 @@ public class DashboardServiceImpl implements DashboardService {
     @Autowired
     private CategoryDao categoryDao;
 
+    @Autowired
+    private SkuDao skuDao;
+
     @Override
     public List<DashboardProduct> getHotSellProducts() {
         Integer sellerId = UserInfoThreadLocal.get().getUserId();
@@ -48,7 +49,7 @@ public class DashboardServiceImpl implements DashboardService {
             // 调用product服务查询商品的名称
             LambdaQueryWrapper<Product> productQueryWrapper = new LambdaQueryWrapper<>();
             productQueryWrapper.eq(Product::getId, hotSellProduct.getProductId())
-                            .select(Product::getName);
+                    .select(Product::getName);
             Product product = this.productDao.selectOne(productQueryWrapper);
             hotSellProduct.setName(product.getName());
         }
@@ -71,11 +72,12 @@ public class DashboardServiceImpl implements DashboardService {
                 case 2:
                     orderStatusVo.setName("待收货");
                     break;
-                case 3:
+                case 4:
                     orderStatusVo.setName("已完成");
                     break;
-                case 4:
+                case 5:
                     orderStatusVo.setName("已取消");
+                    break;
             }
         });
         return orderStatus;
@@ -100,6 +102,12 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
+    public List<OrderStatusVo> getLastMonthOrderSales() {
+        Integer sellerId = UserInfoThreadLocal.get().getUserId();
+        return this.orderDao.getOrderLastMonth(sellerId);
+    }
+
+    @Override
     public SmallData getTodayUnproccessOrders() {
         Integer sellerId = UserInfoThreadLocal.get().getUserId();
         long unProcess = this.dashboardDao.selectAllUnprocessedOrders(sellerId);
@@ -120,19 +128,32 @@ public class DashboardServiceImpl implements DashboardService {
         // 获取今日的订单金额
         Long l = dashboardDao.selectTodaySales(sellerId);
         Long l1 = dashboardDao.selectLastWeekTodaySales(sellerId);
-        if (l == null){
+        SmallData smallData = new SmallData();
+
+        if (l == null) {
             l = 0L;
         }
 
-        SmallData smallData = new SmallData();
         smallData.setBigNum(String.valueOf(l));
         // 计算周同比
-        if (l1 == null){
-            smallData.setSmallNum("100%");
+        if (l == 0L && l1 == null) {
+            smallData.setSmallNum("+0%");
+        } else if (l1 == null){
+            // 上周的这一天没有订单，但是今天有订单
+            smallData.setSmallNum("+100%");
         }else{
-            smallData.setSmallNum((l - l1) / l1 * 100 +"%");
+            smallData.setSmallNum((l - l1)/l1*100+"%");
         }
         // 获取上一周同一天的订单金额
+        return smallData;
+    }
+
+    @Override
+    public SmallData getAllStock() {
+        SmallData smallData = new SmallData();
+        Long allStock = skuDao.getAllStock();
+        smallData.setBigNum(allStock.toString());
+        smallData.setSmallNum(allStock.toString());
         return smallData;
     }
 }

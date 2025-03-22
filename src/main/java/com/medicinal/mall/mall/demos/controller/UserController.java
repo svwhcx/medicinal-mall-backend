@@ -100,8 +100,8 @@ public class UserController extends BaseController {
      */
     @PostMapping("/logout")
     @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
-    public ResultVO<Void> logout(@RequestBody UserLoginVo userLoginVo){
-        userService.logout(userLoginVo);
+    public ResultVO<Void> logout(){
+        userService.logout(null);
         return success();
     }
 

@@ -2,12 +2,14 @@ package com.medicinal.mall.mall.demos.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.medicinal.mall.mall.demos.command.ChangePasswordCmd;
 import com.medicinal.mall.mall.demos.command.FindPasswordCmd;
 import com.medicinal.mall.mall.demos.common.ResponseDataEnum;
 import com.medicinal.mall.mall.demos.common.RoleEnum;
 import com.medicinal.mall.mall.demos.common.UserInfoThreadLocal;
 import com.medicinal.mall.mall.demos.dao.SellerDao;
 import com.medicinal.mall.mall.demos.entity.Seller;
+import com.medicinal.mall.mall.demos.entity.User;
 import com.medicinal.mall.mall.demos.exception.ParamException;
 import com.medicinal.mall.mall.demos.exception.UserLogFail;
 import com.medicinal.mall.mall.demos.query.UserRequest;
@@ -113,10 +115,10 @@ public class SellerServiceImpl implements SellerService {
         if (!verifyCodeContext.getIVerifyCode(verifyCodeRequest).checkVerifyCode(verifyCodeRequest)){
             throw new ParamException(ResponseDataEnum.VERIFICATION_ERROR);
         }
-        // 校验一下用户设置的新密码的强度
-        if (!PasswordUtils.isStrong(findPasswordCmd.getNewPwd())){
-            throw new ParamException(ResponseDataEnum.PASSWORD_NOT_STRONG);
-        }
+//        // 校验一下用户设置的新密码的强度
+//        if (!PasswordUtils.isStrong(findPasswordCmd.getNewPwd())){
+//            throw new ParamException(ResponseDataEnum.PASSWORD_NOT_STRONG);
+//        }
         // 如果验证码正确，则根据邮箱修改对应的用户的登录密码
         LambdaUpdateWrapper<Seller> sellerLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
         sellerLambdaUpdateWrapper.eq(Seller::getEmail,findPasswordCmd.getEmail());
@@ -133,5 +135,25 @@ public class SellerServiceImpl implements SellerService {
     public Seller getInfo() {
         Integer sellerId = UserInfoThreadLocal.get().getUserId();
         return this.sellerDao.selectById(sellerId);
+    }
+
+    @Override
+    public void changePassword(ChangePasswordCmd changePasswordCmd) {
+        // 验证新旧密码就好了
+        String oldPwd = PasswordUtils.encryption(changePasswordCmd.getOldPassword());
+        Integer userId = UserInfoThreadLocal.get().getUserId();
+        LambdaQueryWrapper<Seller> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Seller::getId, userId)
+                .eq(Seller::getPassword, oldPwd);
+        boolean exists = this.sellerDao.exists(queryWrapper);
+        if (!exists) {
+            throw new ParamException(ResponseDataEnum.OLD_PASSWORD_ERROR);
+        }
+        // 如果存在则将密码进行加密然后修改
+        String newPwd = PasswordUtils.encryption(changePasswordCmd.getNewPassword());
+        LambdaUpdateWrapper<Seller> userLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        userLambdaUpdateWrapper.eq(Seller::getId, userId);
+        userLambdaUpdateWrapper.set(Seller::getPassword, newPwd);
+        this.sellerDao.update(userLambdaUpdateWrapper);
     }
 }

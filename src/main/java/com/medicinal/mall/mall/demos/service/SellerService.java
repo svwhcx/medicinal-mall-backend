@@ -1,5 +1,6 @@
 package com.medicinal.mall.mall.demos.service;
 
+import com.medicinal.mall.mall.demos.command.ChangePasswordCmd;
 import com.medicinal.mall.mall.demos.command.FindPasswordCmd;
 import com.medicinal.mall.mall.demos.entity.Seller;
 import com.medicinal.mall.mall.demos.entity.User;
@@ -50,4 +51,9 @@ public interface SellerService {
      */
     Seller getInfo();
 
+    /**
+     * 商家修改自己的密码
+     * @param changePasswordCmd 密码信息
+     */
+    void changePassword(ChangePasswordCmd changePasswordCmd);
 }

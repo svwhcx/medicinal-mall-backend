@@ -39,6 +39,12 @@ public interface DashboardService {
     List<OrderStatusVo> getLastWeekOrderSales();
 
     /**
+     * 商家获取最近一个月的订单销售量（只统计订单的完成时间，是否已退款就不管了）
+     * @return
+     */
+    List<OrderStatusVo> getLastMonthOrderSales();
+
+    /**
      * 商家获取当天的未处理的订单的数量
      * @return
      */
@@ -55,5 +61,11 @@ public interface DashboardService {
      * @return
      */
     SmallData getTodaySales();
+
+    /**
+     * 获取所有的库存信息
+     * @return
+     */
+    SmallData getAllStock();
 
 }

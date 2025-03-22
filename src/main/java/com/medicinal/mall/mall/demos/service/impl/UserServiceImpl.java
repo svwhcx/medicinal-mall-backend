@@ -160,7 +160,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void changePassword(ChangePasswordCmd changePasswordCmd) {
         // 验证新旧密码就好了
-        String oldPwd = PasswordUtils.encryption(changePasswordCmd.getNewPassword());
+        String oldPwd = PasswordUtils.encryption(changePasswordCmd.getOldPassword());
         Integer userId = UserInfoThreadLocal.get().getUserId();
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(User::getId, userId)

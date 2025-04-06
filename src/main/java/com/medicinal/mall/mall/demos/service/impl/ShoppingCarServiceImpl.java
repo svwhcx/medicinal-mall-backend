@@ -134,4 +134,11 @@ public class ShoppingCarServiceImpl implements ShoppingCarService {
 
         return pageVo;
     }
+
+    @Override
+    public void deleteAll() {
+        LambdaQueryWrapper<ShoppingCar> scLqw = new LambdaQueryWrapper<>();
+        scLqw.eq(ShoppingCar::getUserId,UserInfoThreadLocal.get().getUserId());
+        shoppingCarDao.delete(scLqw);
+    }
 }

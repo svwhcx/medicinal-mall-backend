@@ -46,4 +46,7 @@ public interface ShoppingCarService {
      * @return
      */
     PageVo<CartInfoVo> queryByPage(PageQuery pageQuery);
+
+    void deleteAll();
+
 }

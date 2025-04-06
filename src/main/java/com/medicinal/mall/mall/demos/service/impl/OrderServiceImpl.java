@@ -236,8 +236,10 @@ public class OrderServiceImpl implements OrderRefundService {
         Integer userId = UserInfoThreadLocal.get().getUserId();
         LambdaQueryWrapper<Order> orderQueryWrapper = new LambdaQueryWrapper<>();
         orderQueryWrapper
-                .eq(Order::getOrderCode, orderVo.getOrderCode())
-                .eq(Order::getUserId, userId);
+                .eq(Order::getOrderCode, orderVo.getOrderCode());
+        if (UserInfoThreadLocal.get().getRoleId() != 2){
+            orderQueryWrapper.eq(Order::getUserId,userId);
+        }
         List<Order> orderList = this.orderDao.selectList(orderQueryWrapper);
         if (orderList == null || orderList.isEmpty()) {
             // 如果当前用户没有这个订单编号，则提示非法操作！

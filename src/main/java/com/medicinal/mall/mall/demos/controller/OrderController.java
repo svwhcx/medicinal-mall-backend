@@ -82,10 +82,11 @@ public class OrderController extends BaseController {
      * @return
      */
     @GetMapping
-    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
+    @TokenVerify(value = {RoleEnum.user,RoleEnum.seller},isNeedInfo = true)
     public ResultVO<OrderDetailVo> userQueryOrder(OrderVo orderVo){
         return success(orderService.userQueryOrderDetailInfo(orderVo));
     }
+
 
     /**
      * TODO <p>

@@ -12,6 +12,7 @@ import com.medicinal.mall.mall.demos.vo.ShoppingCarInfoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.management.relation.Role;
 import java.util.List;
 
 /**
@@ -66,6 +67,13 @@ public class ShoppingCarController extends BaseController{
     @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
     public ResultVO<Void> deleteByIds(@RequestBody  List<Integer> ids){
         shoppingCarService.deleteById(ids);
+        return success();
+    }
+
+    @DeleteMapping("/all")
+    @TokenVerify(value = RoleEnum.user,isNeedInfo = true)
+    public ResultVO<Void> deleteAll(){
+        shoppingCarService.deleteAll();
         return success();
     }
 

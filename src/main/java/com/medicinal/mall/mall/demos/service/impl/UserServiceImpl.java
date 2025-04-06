@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
         userRequest.setPassword(PasswordUtils.encryption(userRequest.getPassword()));
         // 使用LambdaQueryWrapper来进行User实体类的账号和密码查询
         // 获取数据库中的用户信息
-        User userInfo = userDao.selectOne(new LambdaQueryWrapper<User>().eq(User::getAccount, userRequest.getAccount()).eq(User::getPassword, userRequest.getPassword()));
+        User userInfo = userDao.selectOne(new LambdaQueryWrapper<User>().eq(User::getAccount, userRequest.getAccount()).eq(User::getPassword, userRequest.getPassword()).eq(User::getStatus, 1));
         if (userInfo == null) {
             throw new UserLogFail(ResponseDataEnum.LOGIN_FAIL);
         }
@@ -208,7 +208,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserById(User user) {
         // 如果用户的密码不为空，则对密码进行加密
-        if (user.getPassword() != null){
+        if (user.getPassword() != null) {
             user.setPassword(PasswordUtils.encryption(user.getPassword()));
         }
         userDao.updateById(user);
